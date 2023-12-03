@@ -1,0 +1,53 @@
+[package]
+name = "bevy_jam_2023"
+version = "0.1.0"
+edition = "2021"
+authors = ["Lorenz Mielke"]
+
+[toolchain]
+channel = "nightly"
+
+[profile.dev.package."*"]
+opt-level = 2
+
+[profile.dev]
+opt-level = 1
+
+[profile.release]
+lto = true
+codegen-units = 1
+
+[profile.dist]
+inherits = "release"
+lto = "thin"
+
+[features]
+dev = [
+    "bevy/dynamic_linking",
+	"bevy/file_watcher"
+]
+
+[dependencies]
+bevy = { version = "0.12", default-features = false, features = ["animation", "bevy_asset", "bevy_gilrs", "bevy_scene", "bevy_winit", "bevy_core_pipeline", "bevy_pbr", "bevy_gltf", "bevy_render", "bevy_sprite", "bevy_text", "bevy_ui", "multi-threaded", "png", "hdr", "x11", "bevy_gizmos", "tonemapping_luts", "default_font", "webgl2"] }
+bevy_kira_audio = { version = "0.18" }
+rand = { version = "0.8.3" }
+webbrowser = { version = "0.8", features = ["hardened"] }
+
+winit = { version = "0.28.7", default-features = false }
+image = { version = "0.24", default-features = false }
+
+anyhow = "1.0.75"
+bevy_egui = "0.23.0"
+bevy-inspector-egui = "0.21"
+big-brain = "0.18.0"
+ron = "0.8.1"
+serde = { version = "1.0.193", features = ["derive"] }
+bevy_aseprite = { git = "https://github.com/Lommix/bevy_aseprite.git", branch = "slice-support" }
+bevy_embedded_assets = "0.9.1"
+# bevy_nine_slice_ui = {path = "../bevy_nine_slice_ui"}
+bevy_nine_slice_ui = "0.4.0"
+bevy_tweening = "0.9.0"
+bevy_rapier2d = { version = "0.23.0", features = ["simd-stable", "wasm-bindgen"] }
+
+[build-dependencies]
+embed-resource = "1.4"
