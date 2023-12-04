@@ -2,7 +2,7 @@ use bevy::prelude::*;
 use bevy_inspector_egui::{inspector_options::ReflectInspectorOptions, InspectorOptions};
 use bevy_rapier2d::prelude::*;
 
-use super::{dog::DogTag, physics::MoveTo, AnimalBehavior, SheepTag};
+use super::{dog::DogTag, physics::MoveTo, AnimalBehavior};
 
 pub struct SheepBehaviorPlugin;
 impl Plugin for SheepBehaviorPlugin {
@@ -11,17 +11,53 @@ impl Plugin for SheepBehaviorPlugin {
     }
 }
 
+#[derive(Component)]
+pub struct SheepTag;
+
+#[derive(Bundle)]
+pub struct SheepBundle {
+    pub body: RigidBody,
+    pub collider: Collider,
+    pub velocity: Velocity,
+    pub scene: Handle<Scene>,
+    pub sheep_tag: SheepTag,
+    pub visibility: Visibility,
+    pub inherited_visibility: InheritedVisibility,
+    pub view_visibility: ViewVisibility,
+    pub transform: Transform,
+    pub global_transform: GlobalTransform,
+    pub name: Name,
+    pub mass: ColliderMassProperties,
+}
+
+impl Default for SheepBundle {
+    fn default() -> Self {
+        Self {
+            body: RigidBody::Dynamic,
+            collider: Collider::ball(2.),
+            velocity: Velocity::default(),
+            scene: Handle::default(),
+            name: Name::new("sheep"),
+            sheep_tag: SheepTag,
+            visibility: Visibility::Inherited,
+            inherited_visibility: InheritedVisibility::HIDDEN,
+            view_visibility: ViewVisibility::HIDDEN,
+            transform: Transform::IDENTITY,
+            global_transform: GlobalTransform::IDENTITY,
+            mass: ColliderMassProperties::Mass(10.),
+        }
+    }
+}
 fn sheep_flocking(
     mut velocities: Query<&mut Velocity>,
     dogs: Query<(Entity), With<DogTag>>,
-    query: Query<(Entity), With<SheepTag>>,
-    sheeps: Query<With<SheepTag>>,
+    sheeps: Query<(Entity), With<SheepTag>>,
     move_to: Query<&MoveTo>,
     positions: Query<&Transform>,
     rapier_context: Res<RapierContext>,
     sheep_behavior: Res<AnimalBehavior>,
 ) {
-    query.iter().for_each(|(entity)| {
+    sheeps.iter().for_each(|(entity)| {
         let transform = positions.get(entity).unwrap();
         let collider = Collider::ball(sheep_behavior.vision);
         let mut sheeps_in_range = Vec::new();
@@ -99,6 +135,6 @@ fn sheep_flocking(
         }
 
         velocity.linvel = acc_direction.normalize_or_zero()
-            * (velocity.linvel.length() + flee.length() * 50.).min(sheep_behavior.speed);
+            * (velocity.linvel.length() + flee.length()).min(sheep_behavior.speed);
     });
 }

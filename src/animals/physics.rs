@@ -4,7 +4,7 @@ use bevy_rapier2d::dynamics::Velocity;
 pub struct AnimalPhysicsPlugin;
 impl Plugin for AnimalPhysicsPlugin {
     fn build(&self, app: &mut App) {
-        app.add_systems(Update, ( firction, face_front ));
+        app.add_systems(Update, face_front);
     }
 }
 
@@ -22,13 +22,6 @@ impl MoveTo {
         self.0
     }
 }
-
-fn firction(mut query: Query<&mut Velocity>) {
-    query.iter_mut().for_each(|mut vel| {
-        vel.linvel *= 0.9;
-    });
-}
-
 
 fn face_front(mut query: Query<(&mut Transform, &Velocity)>) {
     query.iter_mut().for_each(|(mut transform, velocity)| {

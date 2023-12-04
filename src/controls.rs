@@ -81,7 +81,6 @@ fn command_dog(
     click_events.read().for_each(|event| {
         dogs.iter_mut().for_each(|(ent, mut move_to)| {
             if event.button() == MouseButton::Right {
-                info!("right click");
 
                 if let Some(mut move_to) = move_to {
                     move_to.set(event.translation().truncate());

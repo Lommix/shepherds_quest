@@ -11,15 +11,16 @@ use bevy_embedded_assets::EmbeddedAssetPlugin;
 use bevy_nine_slice_ui::NineSlicePlugin;
 use state::GameAssets;
 
+mod animals;
 mod camera;
+mod controls;
 mod debug;
 mod game_start;
 mod menu;
 mod ron_loader;
-mod animals;
 mod state;
+mod ui;
 mod util;
-mod controls;
 
 fn main() {
     App::new()
@@ -58,8 +59,13 @@ fn main() {
             state::StatePlugin,
             game_start::GameStartPlugin,
             camera::CameraPlugin,
+            ui::UiPlugin,
         ))
         .add_systems(Startup, load_models)
+        .insert_resource(RapierConfiguration {
+            gravity: Vec2::ZERO,
+            ..default()
+        })
         .run();
 }
 

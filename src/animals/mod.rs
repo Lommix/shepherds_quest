@@ -11,7 +11,10 @@ use bevy_tweening::{lens::*, *};
 
 use crate::state::GameState;
 
-use self::physics::MoveTo;
+use self::{
+    physics::MoveTo,
+    sheep::{SheepBundle, SheepTag},
+};
 
 pub mod dog;
 pub mod physics;
@@ -101,48 +104,4 @@ fn load_animation(
         let random = (rand::random::<f32>() * 0.2) + 0.9;
         player.play(animation.clone()).repeat().set_speed(random);
     });
-}
-
-#[derive(Component)]
-pub struct SheepTag;
-
-#[derive(Bundle)]
-pub struct SheepBundle {
-    pub body: RigidBody,
-    pub collider: Collider,
-    pub velocity: Velocity,
-    // pub mass: ColliderMassProperties,
-    pub scene: Handle<Scene>,
-    // pub slice: AsepriteSlice,
-    // pub aseprite: Handle<Aseprite>,
-    pub sheep_tag: SheepTag,
-    /// The visibility of the entity.
-    pub visibility: Visibility,
-    /// The inherited visibility of the entity.
-    pub inherited_visibility: InheritedVisibility,
-    /// The view visibility of the entity.
-    pub view_visibility: ViewVisibility,
-    /// The transform of the entity.
-    pub transform: Transform,
-    /// The global transform of the entity.
-    pub global_transform: GlobalTransform,
-    pub name: Name,
-}
-
-impl Default for SheepBundle {
-    fn default() -> Self {
-        Self {
-            body: RigidBody::Dynamic,
-            collider: Collider::ball(2.),
-            velocity: Velocity::default(),
-            scene: Handle::default(),
-            name: Name::new("sheep"),
-            sheep_tag: SheepTag,
-            visibility: Visibility::Inherited,
-            inherited_visibility: InheritedVisibility::HIDDEN,
-            view_visibility: ViewVisibility::HIDDEN,
-            transform: Transform::IDENTITY,
-            global_transform: GlobalTransform::IDENTITY,
-        }
-    }
 }

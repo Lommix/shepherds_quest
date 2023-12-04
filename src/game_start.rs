@@ -2,19 +2,42 @@ use bevy::prelude::*;
 use bevy_aseprite::*;
 use bevy_rapier2d::prelude::*;
 
-use crate::{
-    animals::{SheepBundle, SheepTag},
-    state::GameState,
-};
+use crate::state::{AllowedState, GameState};
 
 pub struct GameStartPlugin;
 impl Plugin for GameStartPlugin {
     fn build(&self, app: &mut App) {
-        app.add_systems(OnEnter(GameState::Game), build_map);
+        app.add_systems(OnEnter(GameState::Game), (build_map).chain());
+        app.init_resource::<SheepCount>();
+        app.init_resource::<Level>();
+        app.init_resource::<Score>();
     }
 }
 
-pub fn build_map(
+#[derive(Resource, Default)]
+pub struct Level(pub usize);
+
+#[derive(Resource, Default)]
+pub struct Score(pub usize);
+
+#[derive(Resource, Default)]
+pub struct SheepCount {
+    pub lost: usize,
+    pub saved: usize,
+}
+
+fn reset_score(
+    mut score: ResMut<Score>,
+    mut sheep_count: ResMut<SheepCount>,
+    mut level: ResMut<Level>,
+) {
+    score.0 = 0;
+    sheep_count.lost = 0;
+    sheep_count.saved = 0;
+    level.0 = 0;
+}
+
+fn build_map(
     mut cmd: Commands,
     mut meshes: ResMut<Assets<Mesh>>,
     mut materials: ResMut<Assets<StandardMaterial>>,
@@ -28,6 +51,7 @@ pub fn build_map(
         transform: Transform::from_translation(Vec3::new(0., 0., -1.)),
         ..Default::default()
     })
+    .insert(AllowedState::new(GameState::Game))
     .insert(Name::new("ground"));
 
     cmd.insert_resource(AmbientLight {
@@ -39,9 +63,9 @@ pub fn build_map(
         transform: Transform::from_translation(Vec3::new(0., 0., 100.)),
         point_light: PointLight {
             intensity: 90000.,
-            radius: 2000.,
+            radius: 8000.,
             range: 5000.,
-            // shadows_enabled: true,
+            shadows_enabled: true,
             ..Default::default()
         },
         ..default()
@@ -65,6 +89,7 @@ pub fn build_map(
                 transform,
                 ..Default::default()
             })
+            .insert(AllowedState::new(GameState::Game))
             .insert(collider)
             .insert(RigidBody::Fixed);
         });

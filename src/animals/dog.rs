@@ -1,7 +1,7 @@
 use bevy::{gltf::Gltf, input::mouse::MouseMotion, prelude::*, window::PrimaryWindow};
 use bevy_aseprite::{slice::AsepriteSlice, Aseprite};
 use bevy_rapier2d::{
-    dynamics::{RigidBody, Velocity},
+    dynamics::{Damping, RigidBody, Velocity},
     geometry::{Collider, ColliderMassProperties},
 };
 
@@ -37,7 +37,7 @@ fn move_dogs(
             let direction = move_to.postion() - transform.translation.truncate();
             let distance = direction.length();
 
-            if distance < 10.0 {
+            if distance < 1.0 {
                 cmd.entity(entity).remove::<MoveTo>();
                 velocity.linvel = Vec2::ZERO;
                 return;
@@ -57,17 +57,14 @@ pub struct DogBundle {
     pub scene: Handle<Scene>,
     pub dog_tag: DogTag,
     pub velocity: Velocity,
-    /// The visibility of the entity.
     pub visibility: Visibility,
-    /// The inherited visibility of the entity.
     pub inherited_visibility: InheritedVisibility,
-    /// The view visibility of the entity.
     pub view_visibility: ViewVisibility,
-    /// The transform of the entity.
     pub transform: Transform,
-    /// The global transform of the entity.
     pub global_transform: GlobalTransform,
     pub name: Name,
+    pub damping: Damping,
+    pub mass: ColliderMassProperties,
 }
 
 impl Default for DogBundle {
@@ -84,6 +81,11 @@ impl Default for DogBundle {
             transform: Transform::IDENTITY,
             global_transform: GlobalTransform::IDENTITY,
             name: Name::new("dog"),
+            damping: Damping {
+                linear_damping: 1.,
+                angular_damping: 1.,
+            },
+            mass: ColliderMassProperties::Mass(10.),
         }
     }
 }
