@@ -13,7 +13,6 @@ macro_rules! ron_asset_loader {
             prelude::Plugin,
         };
 
-        use $crate::game_state::GameAssets;
         use bevy::prelude::*;
 
         pub struct $plugin_name;

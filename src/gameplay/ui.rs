@@ -3,10 +3,9 @@ use std::time::Duration;
 use bevy::{prelude::*, time::common_conditions::on_timer};
 use bevy_nine_slice_ui::{NineSliceMaterialBundle, NineSliceTexture};
 
-use crate::{
-    game_start::{Level, Score},
-    state::GameState,
-};
+use crate::state::GameState;
+
+use super::Score;
 
 pub struct UiPlugin;
 impl Plugin for UiPlugin {
@@ -29,17 +28,16 @@ fn update_ui(
     mut texts: Query<&mut Text>,
     mut score: Query<Entity, With<ScoreText>>,
     mut level: Query<Entity, With<LevelText>>,
-    game_level: Res<Level>,
     game_score: Res<Score>,
 ) {
     score.iter_mut().for_each(|ent| {
         let mut text = texts.get_mut(ent).unwrap();
-        text.sections[0].value = format!("Score: {}", game_score.0);
+        text.sections[0].value = format!("Escorted: {}", game_score.saved);
     });
 
     level.iter_mut().for_each(|ent| {
         let mut text = texts.get_mut(ent).unwrap();
-        text.sections[0].value = format!("Level: {}", game_level.0);
+        text.sections[0].value = format!("Lost: {}", game_score.lost);
     });
 }
 

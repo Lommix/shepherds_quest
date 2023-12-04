@@ -1,3 +1,4 @@
+use bevy::core_pipeline::bloom::BloomSettings;
 use bevy::input::mouse::MouseWheel;
 use bevy::prelude::*;
 
@@ -15,6 +16,14 @@ fn spawn_camera(mut cmd: Commands) {
 
     cmd.spawn(Camera3dBundle {
         transform,
+        camera: Camera {
+            hdr: true,
+            ..default()
+        },
+        ..default()
+    })
+    .insert(BloomSettings {
+        intensity: 0.2,
         ..default()
     })
     .insert(Name::new("camera"));

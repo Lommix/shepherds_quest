@@ -15,11 +15,11 @@ mod animals;
 mod camera;
 mod controls;
 mod debug;
-mod game_start;
+mod gameplay;
+mod level;
 mod menu;
 mod ron_loader;
 mod state;
-mod ui;
 mod util;
 
 fn main() {
@@ -57,9 +57,10 @@ fn main() {
             bevy_aseprite::AsepritePlugin,
             menu::MenuPlugin,
             state::StatePlugin,
-            game_start::GameStartPlugin,
             camera::CameraPlugin,
-            ui::UiPlugin,
+            gameplay::GameplayPlugin,
+            util::UtilPlugin,
+            level::LevelPlugin,
         ))
         .add_systems(Startup, load_models)
         .insert_resource(RapierConfiguration {

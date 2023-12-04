@@ -5,7 +5,7 @@ use bevy_rapier2d::{
     geometry::{Collider, ColliderMassProperties},
 };
 
-use crate::state::GameState;
+use crate::state::{AllowedState, GameState};
 
 use super::{animations::AnimalState, physics::MoveTo, AnimalBehavior};
 
@@ -14,6 +14,55 @@ impl Plugin for DogPlugin {
     fn build(&self, app: &mut App) {
         app.add_systems(OnEnter(GameState::Game), spawn_debug_dog);
         app.add_systems(Update, move_dogs);
+    }
+}
+
+#[derive(Component)]
+pub struct DogTag;
+
+#[derive(Bundle)]
+pub struct DogBundle {
+    pub body: RigidBody,
+    pub collider: Collider,
+    pub scene: Handle<Scene>,
+    pub gltf: Handle<Gltf>,
+    pub dog_tag: DogTag,
+    pub state: AnimalState,
+    pub velocity: Velocity,
+    pub visibility: Visibility,
+    pub inherited_visibility: InheritedVisibility,
+    pub view_visibility: ViewVisibility,
+    pub transform: Transform,
+    pub global_transform: GlobalTransform,
+    pub name: Name,
+    pub damping: Damping,
+    pub mass: ColliderMassProperties,
+    pub allowed_game_states: AllowedState,
+}
+
+impl Default for DogBundle {
+    fn default() -> Self {
+        Self {
+            body: RigidBody::Dynamic,
+            collider: Collider::ball(2.),
+            velocity: Velocity::default(),
+            state: AnimalState::Idle,
+            scene: Handle::default(),
+            gltf: Handle::default(),
+            dog_tag: DogTag,
+            visibility: Visibility::Inherited,
+            inherited_visibility: InheritedVisibility::HIDDEN,
+            view_visibility: ViewVisibility::HIDDEN,
+            transform: Transform::IDENTITY,
+            global_transform: GlobalTransform::IDENTITY,
+            name: Name::new("dog"),
+            damping: Damping {
+                linear_damping: 1.,
+                angular_damping: 1.,
+            },
+            allowed_game_states: AllowedState::new(GameState::Game),
+            mass: ColliderMassProperties::Mass(10.),
+        }
     }
 }
 
@@ -46,51 +95,4 @@ fn move_dogs(
 
             velocity.linvel = direction.normalize_or_zero() * animal_behavior.speed * 3.;
         });
-}
-
-#[derive(Component)]
-pub struct DogTag;
-
-#[derive(Bundle)]
-pub struct DogBundle {
-    pub body: RigidBody,
-    pub collider: Collider,
-    pub scene: Handle<Scene>,
-    pub gltf: Handle<Gltf>,
-    pub dog_tag: DogTag,
-    pub state: AnimalState,
-    pub velocity: Velocity,
-    pub visibility: Visibility,
-    pub inherited_visibility: InheritedVisibility,
-    pub view_visibility: ViewVisibility,
-    pub transform: Transform,
-    pub global_transform: GlobalTransform,
-    pub name: Name,
-    pub damping: Damping,
-    pub mass: ColliderMassProperties,
-}
-
-impl Default for DogBundle {
-    fn default() -> Self {
-        Self {
-            body: RigidBody::Dynamic,
-            collider: Collider::ball(2.),
-            velocity: Velocity::default(),
-            state: AnimalState::Idle,
-            scene: Handle::default(),
-            gltf: Handle::default(),
-            dog_tag: DogTag,
-            visibility: Visibility::Inherited,
-            inherited_visibility: InheritedVisibility::HIDDEN,
-            view_visibility: ViewVisibility::HIDDEN,
-            transform: Transform::IDENTITY,
-            global_transform: GlobalTransform::IDENTITY,
-            name: Name::new("dog"),
-            damping: Damping {
-                linear_damping: 1.,
-                angular_damping: 1.,
-            },
-            mass: ColliderMassProperties::Mass(10.),
-        }
-    }
 }

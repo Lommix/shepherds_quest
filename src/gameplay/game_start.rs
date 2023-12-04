@@ -2,39 +2,28 @@ use bevy::prelude::*;
 use bevy_aseprite::*;
 use bevy_rapier2d::prelude::*;
 
-use crate::state::{AllowedState, GameState};
+use crate::{
+    level::LevelBundle,
+    state::{AllowedState, GameState},
+};
+
+use super::{
+    goal::{Goal, GoalBundle},
+    trap::{Trap, TrapBundle},
+};
 
 pub struct GameStartPlugin;
 impl Plugin for GameStartPlugin {
     fn build(&self, app: &mut App) {
-        app.add_systems(OnEnter(GameState::Game), (build_map).chain());
-        app.init_resource::<SheepCount>();
-        app.init_resource::<Level>();
-        app.init_resource::<Score>();
+        app.add_systems(OnEnter(GameState::Game), start_level);
     }
 }
 
-#[derive(Resource, Default)]
-pub struct Level(pub usize);
-
-#[derive(Resource, Default)]
-pub struct Score(pub usize);
-
-#[derive(Resource, Default)]
-pub struct SheepCount {
-    pub lost: usize,
-    pub saved: usize,
-}
-
-fn reset_score(
-    mut score: ResMut<Score>,
-    mut sheep_count: ResMut<SheepCount>,
-    mut level: ResMut<Level>,
-) {
-    score.0 = 0;
-    sheep_count.lost = 0;
-    sheep_count.saved = 0;
-    level.0 = 0;
+fn start_level(mut cmd: Commands, server: Res<AssetServer>) {
+    cmd.spawn(LevelBundle {
+        level: server.load("levels/first.level.ron"),
+        ..default()
+    });
 }
 
 fn build_map(
@@ -65,7 +54,10 @@ fn build_map(
             intensity: 90000.,
             radius: 8000.,
             range: 5000.,
+
+            #[cfg(not(target_arch = "wasm32"))]
             shadows_enabled: true,
+
             ..Default::default()
         },
         ..default()
@@ -74,6 +66,18 @@ fn build_map(
     // wall
     let size: f32 = 200.;
     let thickness: f32 = 1.;
+
+    cmd.spawn(GoalBundle {
+        transform: Transform::from_translation(Vec3::new(0., 168., 0.)),
+        goal: Goal::new(Vec2::new(size, 32.)),
+        ..default()
+    });
+
+    cmd.spawn(TrapBundle {
+        transform: Transform::from_translation(Vec3::new(0., -168., 0.)),
+        trap: Trap::new(Vec2::new(size, 32.)),
+        ..default()
+    });
 
     [Vec3::X, -Vec3::X, Vec3::Y, -Vec3::Y]
         .iter()

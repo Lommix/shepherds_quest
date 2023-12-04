@@ -2,6 +2,8 @@ use bevy::{prelude::*, gltf::Gltf};
 use bevy_inspector_egui::{inspector_options::ReflectInspectorOptions, InspectorOptions};
 use bevy_rapier2d::prelude::*;
 
+use crate::state::{AllowedState, GameState};
+
 use super::{dog::DogTag, physics::MoveTo, AnimalBehavior, animations::AnimalState};
 
 pub struct SheepBehaviorPlugin;
@@ -30,6 +32,7 @@ pub struct SheepBundle {
     pub global_transform: GlobalTransform,
     pub name: Name,
     pub mass: ColliderMassProperties,
+    pub allowed_game_states: AllowedState,
 }
 
 impl Default for SheepBundle {
@@ -49,6 +52,7 @@ impl Default for SheepBundle {
             transform: Transform::IDENTITY,
             global_transform: GlobalTransform::IDENTITY,
             mass: ColliderMassProperties::Mass(10.),
+            allowed_game_states: AllowedState::new(GameState::Game),
         }
     }
 }

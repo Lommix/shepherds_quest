@@ -16,12 +16,12 @@ use self::{
     sheep::{SheepBundle, SheepTag},
 };
 
-mod animations;
+pub mod animations;
 pub mod dog;
 pub mod physics;
 pub mod sheep;
 
-const SPAWN_COUNT: usize = 1000;
+const SPAWN_COUNT: usize = 500;
 
 pub struct SheepPlugin;
 impl Plugin for SheepPlugin {
