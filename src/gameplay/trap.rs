@@ -87,10 +87,11 @@ fn watch_trap_enter(
     goals.iter().for_each(|entity| {
         rapier_context
             .intersections_with(entity)
-            .for_each(|(_, collider, _)| {
-                let Ok(sheep_ent) = sheeps.get(collider) else {
+            .for_each(|(a, b, _)| {
+                let sheep_ent = if a == entity { b } else { a };
+                if sheeps.get(sheep_ent).is_err() {
                     return;
-                };
+                }
 
                 cmd.entity(sheep_ent)
                     .insert(LifeTime::from_seconds(0.5))

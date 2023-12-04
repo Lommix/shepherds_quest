@@ -12,7 +12,7 @@ use super::{animations::AnimalState, physics::MoveTo, AnimalBehavior};
 pub struct DogPlugin;
 impl Plugin for DogPlugin {
     fn build(&self, app: &mut App) {
-        app.add_systems(OnEnter(GameState::Game), spawn_debug_dog);
+        // app.add_systems(OnEnter(GameState::Game), spawn_debug_dog);
         app.add_systems(Update, move_dogs);
     }
 }

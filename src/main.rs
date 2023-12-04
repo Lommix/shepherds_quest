@@ -49,7 +49,6 @@ fn main() {
                 }),
             WorldInspectorPlugin::default(),
             RapierPhysicsPlugin::<()>::default(),
-            // RapierDebugRenderPlugin::default(),
             NineSlicePlugin::default(),
             controls::ControlPlugin,
             animals::SheepPlugin,
@@ -62,6 +61,7 @@ fn main() {
             util::UtilPlugin,
             level::LevelPlugin,
         ))
+        // .add_plugins(RapierDebugRenderPlugin::default())
         .add_systems(Startup, load_models)
         .insert_resource(RapierConfiguration {
             gravity: Vec2::ZERO,

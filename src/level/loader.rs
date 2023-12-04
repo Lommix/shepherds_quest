@@ -49,7 +49,6 @@ pub struct LevelAsset {
     pub parsed: Option<Vec<(Vec2, Tiles)>>,
 }
 
-
 #[derive(Debug)]
 pub enum Tiles {
     Empty,
@@ -98,32 +97,32 @@ impl Iterator for LayoutIterator<'_> {
                 self.next()
             }
             Some(b'G') => {
+                let pos = Vec2::new(self.row as f32, self.col as f32) * TILE_SIZE;
                 self.advance_col();
-                None
+                Some(Ok((pos, Tiles::Goal)))
             }
             Some(b'T') => {
-                let pos = Vec2::new(self.col as f32, self.row as f32) * TILE_SIZE;
-                let tile = Tiles::Trap;
+                let pos = Vec2::new(self.row as f32, self.col as f32) * TILE_SIZE;
                 self.advance_col();
                 Some(Ok((pos, Tiles::Trap)))
             }
             Some(b'S') => {
-                let pos = Vec2::new(self.col as f32, self.row as f32) * TILE_SIZE;
+                let pos = Vec2::new(self.row as f32, self.col as f32) * TILE_SIZE;
                 self.advance_col();
                 Some(Ok((pos, Tiles::Sheep)))
             }
             Some(b'D') => {
-                let pos = Vec2::new(self.col as f32, self.row as f32) * TILE_SIZE;
+                let pos = Vec2::new(self.row as f32, self.col as f32) * TILE_SIZE;
                 self.advance_col();
                 Some(Ok((pos, Tiles::Dog)))
             }
             Some(b'#') => {
-                let pos = Vec2::new(self.col as f32, self.row as f32) * TILE_SIZE;
+                let pos = Vec2::new(self.row as f32, self.col as f32) * TILE_SIZE;
                 self.advance_col();
                 Some(Ok((pos, Tiles::Wall)))
             }
             Some(b'-') => {
-                let pos = Vec2::new(self.col as f32, self.row as f32) * TILE_SIZE;
+                let pos = Vec2::new(self.row as f32, self.col as f32) * TILE_SIZE;
                 self.advance_col();
                 Some(Ok((pos, Tiles::Empty)))
             }

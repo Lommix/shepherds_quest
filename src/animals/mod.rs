@@ -21,8 +21,6 @@ pub mod dog;
 pub mod physics;
 pub mod sheep;
 
-const SPAWN_COUNT: usize = 500;
-
 pub struct SheepPlugin;
 impl Plugin for SheepPlugin {
     fn build(&self, app: &mut App) {
@@ -32,16 +30,15 @@ impl Plugin for SheepPlugin {
             animations::AnimalAnimationPlugin,
             physics::AnimalPhysicsPlugin,
         ));
-        app.add_systems(OnEnter(GameState::Game), start_level);
         app.add_systems(Update, (bounce));
         app.insert_resource(AnimalBehavior {
             alignment: 0.5,
             cohesion: 1.0,
             separation: 0.6,
-            speed: 10.0,
-            vision: 15.0,
+            speed: 20.0,
+            vision: 20.0,
             fear: 1.0,
-            motivation: 0.02,
+            motivation: 0.01,
         });
     }
 }
@@ -55,20 +52,6 @@ pub struct AnimalBehavior {
     pub vision: f32,
     pub fear: f32,
     pub motivation: f32,
-}
-
-fn start_level(mut cmd: Commands, server: Res<AssetServer>) {
-    let position = crate::util::quad_formation(SPAWN_COUNT, 5.);
-    (0..SPAWN_COUNT).zip(position).for_each(|(i, pos)| {
-        let transform = Transform::from_translation(pos);
-        cmd.spawn(SheepBundle {
-            scene: server.load("models/sheep.glb#Scene0"),
-            gltf: server.load("models/sheep.glb"),
-            transform,
-            ..default()
-        })
-        .insert(MoveTo::new(Vec2::ZERO));
-    });
 }
 
 fn bounce(

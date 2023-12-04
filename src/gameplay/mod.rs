@@ -1,11 +1,9 @@
 use bevy::prelude::*;
 
-mod game_start;
-mod goal;
-mod level;
-mod spawner;
-mod trap;
+pub mod goal;
+pub mod trap;
 mod ui;
+mod game_start;
 
 pub struct GameplayPlugin;
 impl Plugin for GameplayPlugin {
@@ -15,9 +13,7 @@ impl Plugin for GameplayPlugin {
             game_start::GameStartPlugin,
             goal::GoalPlugin,
             ui::UiPlugin,
-            level::LevelPlugin,
         ));
-
         app.init_resource::<Score>();
     }
 }
