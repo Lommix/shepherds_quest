@@ -7,7 +7,7 @@ use bevy_rapier2d::{
 
 use crate::state::GameState;
 
-use super::{physics::MoveTo, AnimalBehavior};
+use super::{animations::AnimalState, physics::MoveTo, AnimalBehavior};
 
 pub struct DogPlugin;
 impl Plugin for DogPlugin {
@@ -21,6 +21,7 @@ fn spawn_debug_dog(mut cmd: Commands, server: Res<AssetServer>) {
     let transform = Transform::from_translation(Vec3::new(0., -100., 0.));
     cmd.spawn(DogBundle {
         scene: server.load("models/pug.glb#Scene0"),
+        gltf: server.load("models/pug.glb"),
         transform,
         ..default()
     });
@@ -37,7 +38,7 @@ fn move_dogs(
             let direction = move_to.postion() - transform.translation.truncate();
             let distance = direction.length();
 
-            if distance < 1.0 {
+            if distance < 2.0 {
                 cmd.entity(entity).remove::<MoveTo>();
                 velocity.linvel = Vec2::ZERO;
                 return;
@@ -55,7 +56,9 @@ pub struct DogBundle {
     pub body: RigidBody,
     pub collider: Collider,
     pub scene: Handle<Scene>,
+    pub gltf: Handle<Gltf>,
     pub dog_tag: DogTag,
+    pub state: AnimalState,
     pub velocity: Velocity,
     pub visibility: Visibility,
     pub inherited_visibility: InheritedVisibility,
@@ -73,7 +76,9 @@ impl Default for DogBundle {
             body: RigidBody::Dynamic,
             collider: Collider::ball(2.),
             velocity: Velocity::default(),
+            state: AnimalState::Idle,
             scene: Handle::default(),
+            gltf: Handle::default(),
             dog_tag: DogTag,
             visibility: Visibility::Inherited,
             inherited_visibility: InheritedVisibility::HIDDEN,

@@ -16,28 +16,32 @@ use self::{
     sheep::{SheepBundle, SheepTag},
 };
 
+mod animations;
 pub mod dog;
 pub mod physics;
 pub mod sheep;
 
-const SPAWN_COUNT: usize = 500;
+const SPAWN_COUNT: usize = 1000;
 
 pub struct SheepPlugin;
 impl Plugin for SheepPlugin {
     fn build(&self, app: &mut App) {
-        app.add_plugins(physics::AnimalPhysicsPlugin);
-        app.add_plugins(dog::DogPlugin);
-        app.add_plugins(sheep::SheepBehaviorPlugin);
+        app.add_plugins((
+            dog::DogPlugin,
+            sheep::SheepBehaviorPlugin,
+            animations::AnimalAnimationPlugin,
+            physics::AnimalPhysicsPlugin,
+        ));
         app.add_systems(OnEnter(GameState::Game), start_level);
         app.add_systems(Update, (bounce));
         app.insert_resource(AnimalBehavior {
-            alignment: 0.8,
-            cohesion: 0.8,
-            separation: 0.8,
+            alignment: 0.5,
+            cohesion: 1.0,
+            separation: 0.6,
             speed: 10.0,
             vision: 15.0,
             fear: 1.0,
-            motivation: 0.5,
+            motivation: 0.02,
         });
     }
 }
@@ -59,6 +63,7 @@ fn start_level(mut cmd: Commands, server: Res<AssetServer>) {
         let transform = Transform::from_translation(pos);
         cmd.spawn(SheepBundle {
             scene: server.load("models/sheep.glb#Scene0"),
+            gltf: server.load("models/sheep.glb"),
             transform,
             ..default()
         })

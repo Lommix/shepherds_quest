@@ -1,8 +1,8 @@
-use bevy::prelude::*;
+use bevy::{prelude::*, gltf::Gltf};
 use bevy_inspector_egui::{inspector_options::ReflectInspectorOptions, InspectorOptions};
 use bevy_rapier2d::prelude::*;
 
-use super::{dog::DogTag, physics::MoveTo, AnimalBehavior};
+use super::{dog::DogTag, physics::MoveTo, AnimalBehavior, animations::AnimalState};
 
 pub struct SheepBehaviorPlugin;
 impl Plugin for SheepBehaviorPlugin {
@@ -20,6 +20,8 @@ pub struct SheepBundle {
     pub collider: Collider,
     pub velocity: Velocity,
     pub scene: Handle<Scene>,
+    pub gltf: Handle<Gltf>,
+    pub state : AnimalState,
     pub sheep_tag: SheepTag,
     pub visibility: Visibility,
     pub inherited_visibility: InheritedVisibility,
@@ -37,6 +39,8 @@ impl Default for SheepBundle {
             collider: Collider::ball(2.),
             velocity: Velocity::default(),
             scene: Handle::default(),
+            gltf: Handle::default(),
+            state: AnimalState::Idle,
             name: Name::new("sheep"),
             sheep_tag: SheepTag,
             visibility: Visibility::Inherited,

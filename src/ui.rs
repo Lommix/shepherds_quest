@@ -56,64 +56,76 @@ fn spawn_ui(mut cmd: Commands, asset_server: Res<AssetServer>) {
         ..default()
     })
     .with_children(|cmd| {
-        cmd.spawn(NineSliceMaterialBundle {
+        cmd.spawn(NodeBundle {
             style: Style {
-                display: Display::Flex,
-                width: Val::Px(150.),
+                display: Display::Grid,
+                width: Val::Px(400.),
                 height: Val::Px(50.),
-                justify_content: JustifyContent::Center,
-                align_items: AlignItems::Center,
+                grid_template_rows: vec![GridTrack::auto(), GridTrack::auto()],
                 ..default()
             },
-            nine_slice_texture: NineSliceTexture::from_slice(
-                asset_server.load("sprites/ui.png"),
-                Rect::new(0., 0., 48., 48.),
-            ),
             ..default()
         })
         .with_children(|cmd| {
-            cmd.spawn(TextBundle {
-                text: Text::from_section(
-                    "Nil",
-                    TextStyle {
-                        font_size: 20.,
-                        color: Color::WHITE,
-                        ..default()
-                    },
+            cmd.spawn(NineSliceMaterialBundle {
+                style: Style {
+                    display: Display::Flex,
+                    width: Val::Px(150.),
+                    height: Val::Px(50.),
+                    justify_content: JustifyContent::Center,
+                    align_items: AlignItems::Center,
+                    ..default()
+                },
+                nine_slice_texture: NineSliceTexture::from_slice(
+                    asset_server.load("sprites/ui.png"),
+                    Rect::new(0., 0., 48., 48.),
                 ),
                 ..default()
             })
-            .insert(ScoreText);
-        });
+            .with_children(|cmd| {
+                cmd.spawn(TextBundle {
+                    text: Text::from_section(
+                        "Nil",
+                        TextStyle {
+                            font_size: 20.,
+                            color: Color::WHITE,
+                            ..default()
+                        },
+                    ),
+                    ..default()
+                })
+                .insert(ScoreText);
+            });
 
-        cmd.spawn(NineSliceMaterialBundle {
-            style: Style {
-                display: Display::Flex,
-                width: Val::Px(150.),
-                height: Val::Px(50.),
-                justify_content: JustifyContent::Center,
-                align_items: AlignItems::Center,
-                ..default()
-            },
-            nine_slice_texture: NineSliceTexture::from_slice(
-                asset_server.load("sprites/ui.png"),
-                Rect::new(0., 0., 48., 48.),
-            ),
-            ..default()
-        })
-        .with_children(|cmd| {
-            cmd.spawn(TextBundle {
-                text: Text::from_section(
-                    "Nil",
-                    TextStyle {
-                        font_size: 20.,
-                        color: Color::WHITE,
-                        ..default()
-                    },
+            cmd.spawn(NineSliceMaterialBundle {
+                style: Style {
+                    display: Display::Flex,
+                    width: Val::Px(150.),
+                    height: Val::Px(50.),
+                    justify_content: JustifyContent::Center,
+                    align_items: AlignItems::Center,
+                    ..default()
+                },
+                nine_slice_texture: NineSliceTexture::from_slice(
+                    asset_server.load("sprites/ui.png"),
+                    Rect::new(0., 0., 48., 48.),
                 ),
                 ..default()
             })
-            .insert(LevelText);
+            .with_children(|cmd| {
+                cmd.spawn(TextBundle {
+                    text: Text::from_section(
+                        "Nil",
+                        TextStyle {
+                            font_size: 20.,
+                            color: Color::WHITE,
+                            ..default()
+                        },
+                    ),
+                    ..default()
+                })
+                .insert(LevelText);
+            });
         });
     });
 }

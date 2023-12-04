@@ -72,7 +72,9 @@ fn main() {
 fn load_models(mut game_assets: ResMut<GameAssets>, server: Res<AssetServer>) {
     let dog_handle: Handle<Gltf> = server.load("models/pug.glb");
     let sheep_handle: Handle<Gltf> = server.load("models/sheep.glb");
+    let llama_handle: Handle<Gltf> = server.load("models/sheep.glb");
 
-    game_assets.add(sheep_handle.untyped());
-    game_assets.add(dog_handle.untyped());
+    game_assets.add(sheep_handle.clone().untyped());
+    game_assets.add(dog_handle.clone().untyped());
+    game_assets.add(llama_handle.clone().untyped());
 }

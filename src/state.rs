@@ -1,4 +1,4 @@
-use bevy::{asset::LoadState, prelude::*};
+use bevy::{asset::LoadState, gltf::Gltf, prelude::*};
 
 pub struct StatePlugin;
 
@@ -33,6 +33,7 @@ impl AllowedState {
 
 #[derive(Resource, Default)]
 pub struct GameAssets(Vec<UntypedHandle>);
+
 impl GameAssets {
     pub fn add(&mut self, handle: UntypedHandle) {
         self.0.push(handle);
