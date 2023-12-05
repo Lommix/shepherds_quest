@@ -113,7 +113,7 @@ fn llama_stomp(
                         });
 
                     sheeps_in_range.push(e);
-                    return true;
+                    true
                 },
             );
 

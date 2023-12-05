@@ -288,7 +288,7 @@ fn portrait_render_scene(
             ..default()
         },
         camera_2d: Camera2d {
-            clear_color: ClearColorConfig::Custom(Color::BLUE.with_a(0.).into()),
+            clear_color: ClearColorConfig::Custom(Color::BLUE.with_a(0.)),
         },
         ..default()
     })

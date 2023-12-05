@@ -1,5 +1,3 @@
-#![allow(unused)]
-
 use bevy::{
     gltf::Gltf, prelude::*, render::texture::ImageSamplerDescriptor, window::WindowResolution,
 };

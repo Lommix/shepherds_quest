@@ -15,7 +15,7 @@ impl Plugin for LevelTransitionPlugin {
 }
 
 fn retry_level(mut event: EventReader<LevelLost>, mut cmd: Commands, server: Res<AssetServer>) {
-    if let None = event.iter().next() {
+    if event.iter().next().is_none() {
         return;
     }
 
@@ -36,7 +36,7 @@ fn retry_level(mut event: EventReader<LevelLost>, mut cmd: Commands, server: Res
 }
 
 fn next_level(mut event: EventReader<LevelWon>, mut cmd: Commands, server: Res<AssetServer>) {
-    if let None = event.iter().next() {
+    if event.iter().next().is_none() {
         return;
     }
 

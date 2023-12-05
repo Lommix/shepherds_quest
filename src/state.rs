@@ -67,8 +67,7 @@ fn await_asset_loading(
 ) {
     game_assets
         .iter()
-        .map(|handle| server.get_load_state(handle.id()))
-        .flatten()
+        .filter_map(|handle| server.get_load_state(handle.id()))
         .all(|state| state == LoadState::Loaded)
         .then(|| state.set(GameState::Menu));
 }

@@ -79,13 +79,13 @@ fn sheep_flocking(
             QueryFilter::default().predicate(&|ent| ent != entity && sheeps.get(ent).is_ok()),
             |ent| {
                 sheeps_in_range.push(ent);
-                return true;
+                true
             },
         );
 
         let mut acc_direction = Vec2::ZERO;
 
-        if sheeps_in_range.len() > 0 {
+        if !sheeps_in_range.is_empty() {
             let average_position = sheeps_in_range
                 .iter()
                 .map(|ent| positions.get(*ent).unwrap().translation.truncate())
