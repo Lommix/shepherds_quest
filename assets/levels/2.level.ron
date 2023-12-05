@@ -1,0 +1,18 @@
+(
+    name: "Pug in training",
+    intro: "Sheperd Bob: Oh no! The sheeps are escaping! Help me to get them back into the stable! Now is your time to shine, Henk!",
+    win: "Good boy! Maybe pugs can be sheperds after all!",
+    loose: "Bad boy! You messed up! Maybe I should get a real sheperd dog instead of a pug...",
+    llama_stomp_rate: 5,
+    sheeps_per_spawn: 30,
+    win_percent: 50,
+    layout:
+"#############
+#-D------#-G#
+#-----T--#-G#
+#-SS--#--T-G#
+#-SS--#----G#
+#############",
+)
+
+

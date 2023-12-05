@@ -1,11 +1,6 @@
 use self::loader::LevelAsset;
-use crate::{
-    state::{AllowedState, GameState},
-};
-use bevy::{
-    prelude::*,
-};
-
+use crate::state::{AllowedState, GameState};
+use bevy::prelude::*;
 
 pub mod builder;
 pub mod loader;
@@ -13,10 +8,10 @@ pub mod progress;
 pub mod transistion;
 
 pub const CAMPAIGN_LEVELS: [&str; 4] = [
-    "levels/first.level.ron",
-    "levels/second.level.ron",
-    "levels/third.level.ron",
-    "levels/fourth.level.ron",
+    "levels/1.level.ron",
+    "levels/2.level.ron",
+    "levels/3.level.ron",
+    "levels/4.level.ron",
 ];
 
 pub struct LevelPlugin;
@@ -38,6 +33,12 @@ pub struct LevelLoaded;
 
 #[derive(Resource, Default)]
 pub struct CurrentLevel(pub usize);
+impl CurrentLevel {
+    pub fn next_level(&mut self) -> usize {
+        self.0 += 1;
+        self.0
+    }
+}
 
 #[derive(Bundle)]
 pub struct LevelBundle {

@@ -145,6 +145,6 @@ fn sheep_flocking(
         }
 
         velocity.linvel = acc_direction.normalize_or_zero()
-            * (velocity.linvel.length() + flee.length()).min(sheep_behavior.speed);
+            * (velocity.linvel.length() + flee.length()).min(sheep_behavior.sheep_speed);
     });
 }

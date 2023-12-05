@@ -1,13 +1,4 @@
-
-
-use bevy::{prelude::*};
-
-
-
-
-
-
-
+use bevy::prelude::*;
 
 pub mod animations;
 pub mod dog;
@@ -29,7 +20,7 @@ impl Plugin for SheepPlugin {
             alignment: 1.0,
             cohesion: 1.0,
             separation: 0.5,
-            speed: 23.0,
+            sheep_speed: 32.0,
             vision: 20.0,
             fear: 1.0,
             motivation: 0.1,
@@ -43,7 +34,7 @@ pub struct AnimalBehavior {
     pub alignment: f32,
     pub cohesion: f32,
     pub separation: f32,
-    pub speed: f32,
+    pub sheep_speed: f32,
     pub vision: f32,
     pub fear: f32,
     pub motivation: f32,

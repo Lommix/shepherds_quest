@@ -17,7 +17,6 @@ mod debug;
 mod goal;
 mod level;
 mod menu;
-mod ron_loader;
 mod state;
 mod trap;
 mod ui;

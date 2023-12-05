@@ -1,41 +1,17 @@
-
+use crate::state::{AllowedState, GameState};
 use bevy::prelude::*;
 use bevy_nine_slice_ui::NineSliceUiTexture;
-
-use crate::{
-    level::{builder::LoadLevelEvent, CAMPAIGN_LEVELS},
-    state::{AllowedState, GameState},
-};
 
 pub struct MenuPlugin;
 impl Plugin for MenuPlugin {
     fn build(&self, app: &mut App) {
         app.add_systems(OnEnter(GameState::Menu), spawn_menue);
-        app.add_systems(Update, (hover_effect, start_game));
+        app.add_systems(Update, hover_effect);
     }
 }
 
 #[derive(Component)]
 pub struct LevelSelectorButton(pub usize);
-
-fn start_game(
-    mut events: EventWriter<LoadLevelEvent>,
-    mut state: ResMut<NextState<GameState>>,
-    query: Query<(&Interaction, &LevelSelectorButton), Changed<Interaction>>,
-    server: Res<AssetServer>,
-) {
-    query
-        .iter()
-        .for_each(|(interaction, selection)| match *interaction {
-            Interaction::Pressed => {
-                state.set(GameState::GameOver);
-                events.send(LoadLevelEvent::new(
-                    server.load(CAMPAIGN_LEVELS[selection.0]),
-                ));
-            }
-            _ => {}
-        });
-}
 
 fn hover_effect(_cmd: Commands, mut query: Query<(Entity, &Interaction, &mut NineSliceUiTexture)>) {
     query
