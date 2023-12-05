@@ -4,14 +4,15 @@ use bevy_rapier2d::{dynamics::RigidBody, geometry::Collider};
 use crate::{
     animals::{dog::DogBundle, llama::LLamaBundle, physics::MoveTo, sheep::SheepBundle},
     goal::{Goal, GoalBundle},
-    level::LevelBundle,
-    state::{GameState},
+    level::{LevelBundle, TILE_SIZE},
+    state::GameState,
     trap::{Trap, TrapBundle},
     ui::Dialog,
 };
 
 use super::{
-    loader::{LevelAsset, Tiles, TILE_SIZE}, LevelLoaded, Score, TileBundle,
+    loader::{LevelAsset, Tiles},
+    LevelLoaded, Score, TileBundle,
 };
 
 pub struct LevelBuilderPlugin;
@@ -77,14 +78,37 @@ fn load_level(
             return;
         };
 
+        let gras_material = materials.add(StandardMaterial {
+            base_color: Color::WHITE,
+            base_color_texture: Some(server.load("sprites/grass.png")),
+            ..default()
+        });
+
+        let wall_material = materials.add(StandardMaterial {
+            base_color: Color::WHITE,
+            base_color_texture: Some(server.load("textures/cartoon_wall.png")),
+            ..default()
+        });
+
+        let wall_mesh = meshes.add(
+            Mesh::from(shape::Box::new(TILE_SIZE, TILE_SIZE, 5.))
+                .with_generated_tangents()
+                .unwrap(),
+        );
+
+        let flat_mesh = meshes.add(
+            Mesh::from(shape::Quad::new(Vec2::splat(TILE_SIZE)))
+                .with_generated_tangents()
+                .unwrap(),
+        );
+
         cmd.entity(entity).with_children(|cmd| {
             data.iter().for_each(|(pos, tile)| match tile {
                 Tiles::Empty | Tiles::Sheep | Tiles::Dog | Tiles::Llama => {
-                    let color: Color = [0.0, 1.0, 0.2, 1.].into();
                     cmd.spawn(TileBundle {
-                        mesh: meshes.add(Mesh::from(shape::Quad::new(Vec2::splat(TILE_SIZE)))),
-                        material: materials.add(color.into()),
+                        mesh: flat_mesh.clone(),
                         transform: Transform::from_translation(pos.extend(0.)),
+                        material: gras_material.clone(),
                         ..Default::default()
                     });
 
@@ -122,10 +146,9 @@ fn load_level(
                     }
                 }
                 Tiles::Wall => {
-                    let color: Color = [0.5, 0.5, 0.5, 1.].into();
                     cmd.spawn(TileBundle {
-                        mesh: meshes.add(Mesh::from(shape::Box::new(TILE_SIZE, TILE_SIZE, 5.))),
-                        material: materials.add(color.into()),
+                        mesh: wall_mesh.clone(),
+                        material: wall_material.clone(),
                         transform: Transform::from_translation(pos.extend(0.)),
                         ..Default::default()
                     })
@@ -148,11 +171,12 @@ fn load_level(
                 }
             });
             cmd.spawn(PointLightBundle {
-                transform: Transform::from_translation((level.size.unwrap() / 2.).extend(180.)),
+                transform: Transform::from_translation((level.size.unwrap() / 2.).extend(225.)),
                 point_light: PointLight {
-                    intensity: 990000.,
-                    radius: 99000.,
-                    range: 5000.,
+                    color: Color::rgb_u8(177, 230, 250),
+                    intensity: 1990000.,
+                    radius: 0.,
+                    range: 500.,
                     #[cfg(not(target_arch = "wasm32"))]
                     shadows_enabled: true,
                     ..Default::default()
@@ -163,6 +187,21 @@ fn load_level(
             info!("enter game");
             next_state.set(GameState::Game);
         });
+
+        cmd.spawn(MaterialMeshBundle {
+            transform: Transform::from_translation(Vec3::new(
+                level.size.unwrap().x / 2.,
+                level.size.unwrap().y / 2.,
+                -1.,
+            )),
+            mesh: meshes.add(Mesh::from(shape::Quad::new(Vec2::splat(9000.)))),
+            material: materials.add(StandardMaterial {
+                base_color: Color::GREEN,
+                ..default()
+            }),
+            ..default()
+        })
+        .insert(Name::new("Ground"));
 
         cmd.entity(entity).insert(LevelLoaded);
         dialog.sections[0].value = level.intro.clone();

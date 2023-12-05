@@ -1,3 +1,4 @@
+use bevy::asset::AssetMetaCheck;
 #[allow(unused)]
 use bevy::{
     gltf::Gltf, prelude::*, render::texture::ImageSamplerDescriptor, window::WindowResolution,
@@ -7,6 +8,7 @@ use bevy_rapier2d::prelude::*;
 
 #[cfg(not(debug_assertions))]
 use bevy_embedded_assets::EmbeddedAssetPlugin;
+
 use bevy_nine_slice_ui::NineSliceUiPlugin;
 use state::GameAssets;
 
@@ -24,6 +26,7 @@ mod util;
 
 fn main() {
     App::new()
+        .insert_resource(AssetMetaCheck::Never)
         .add_plugins((
             #[cfg(not(debug_assertions))]
             EmbeddedAssetPlugin {
@@ -65,6 +68,10 @@ fn main() {
         .insert_resource(RapierConfiguration {
             gravity: Vec2::ZERO,
             ..default()
+        })
+        .insert_resource(AmbientLight {
+            color: Color::rgb_u8(194, 229, 156),
+            brightness: 0.2,
         })
         .run();
 }

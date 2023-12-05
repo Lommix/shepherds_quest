@@ -4,8 +4,7 @@ use bevy::{
 };
 use serde::Deserialize;
 
-
-pub const TILE_SIZE: f32 = 32.;
+use super::TILE_SIZE;
 
 pub struct LevelLoaderPlugin;
 impl Plugin for LevelLoaderPlugin {

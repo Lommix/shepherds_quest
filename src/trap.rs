@@ -1,3 +1,5 @@
+use std::time::Duration;
+
 use bevy::prelude::*;
 use bevy_rapier2d::{
     dynamics::Velocity,
@@ -92,7 +94,7 @@ fn watch_trap_enter(
                 }
 
                 cmd.entity(sheep_ent)
-                    .insert(LifeTime::from_seconds(0.5))
+                    .insert(LifeTime::new(Duration::from_millis(500)))
                     .insert(AnimalState::Dead)
                     .remove::<Velocity>()
                     .remove::<SheepTag>()

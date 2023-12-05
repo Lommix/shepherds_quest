@@ -2,7 +2,10 @@ use bevy::{gltf::Gltf, prelude::*};
 
 use bevy_rapier2d::prelude::*;
 
-use crate::{state::{AllowedState, GameState}, util::Cooldown};
+use crate::{
+    state::{AllowedState, GameState},
+    util::Cooldown,
+};
 
 use super::{animations::AnimalState, dog::DogTag, physics::MoveTo, AnimalBehavior};
 
@@ -61,7 +64,7 @@ impl Default for SheepBundle {
 fn sheep_flocking(
     mut velocities: Query<&mut Velocity>,
     dogs: Query<Entity, With<DogTag>>,
-    sheeps: Query<Entity, ( With<SheepTag>, Without<Cooldown> )>,
+    sheeps: Query<Entity, (With<SheepTag>, Without<Cooldown>)>,
     move_to: Query<&MoveTo>,
     positions: Query<&Transform>,
     rapier_context: Res<RapierContext>,

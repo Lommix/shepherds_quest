@@ -7,6 +7,8 @@ pub mod loader;
 pub mod progress;
 pub mod transistion;
 
+pub const TILE_SIZE: f32 = 8.;
+
 pub const CAMPAIGN_LEVELS: [&str; 1] = [
     "levels/1.level.ron",
     // "levels/2.level.ron",

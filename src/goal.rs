@@ -1,3 +1,5 @@
+use std::time::Duration;
+
 use bevy::prelude::*;
 use bevy_rapier2d::{
     dynamics::Velocity,
@@ -7,9 +9,9 @@ use bevy_rapier2d::{
 
 use crate::{
     animals::{animations::AnimalState, sheep::SheepTag},
-    util::LifeTime, level::Score,
+    level::Score,
+    util::LifeTime,
 };
-
 
 pub const SUCCESS_GLOW: Handle<StandardMaterial> = Handle::weak_from_u128(12561396483470153565671);
 pub const FAIL_GLOW: Handle<StandardMaterial> = Handle::weak_from_u128(125613964543455646571);
@@ -113,14 +115,13 @@ fn watch_goal_enter(
         rapier_context
             .intersections_with(entity)
             .for_each(|(a, b, _)| {
-
                 let sheep_ent = if a == entity { b } else { a };
                 if sheeps.get(sheep_ent).is_err() {
                     return;
                 }
 
                 cmd.entity(sheep_ent)
-                    .insert(LifeTime::from_seconds(0.2))
+                    .insert(LifeTime::new(Duration::from_millis(200)))
                     .insert(AnimalState::Jumping)
                     .remove::<Velocity>()
                     .remove::<SheepTag>()

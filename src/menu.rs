@@ -1,3 +1,5 @@
+#![allow(unused)]
+
 use crate::state::{AllowedState, GameState};
 use bevy::prelude::*;
 use bevy_nine_slice_ui::NineSliceUiTexture;

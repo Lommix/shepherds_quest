@@ -13,31 +13,17 @@ impl Plugin for UtilPlugin {
 
 #[derive(Component)]
 pub struct LifeTime(Timer);
-
 impl LifeTime {
-    pub fn new(time: f32) -> Self {
-        Self(Timer::from_seconds(time, TimerMode::Once))
-    }
-    pub fn remaining(&self) -> std::time::Duration {
-        self.0.remaining()
-    }
-    pub fn from_seconds(seconds: f32) -> Self {
-        Self(Timer::from_seconds(seconds, TimerMode::Once))
+    pub fn new(duration: Duration) -> Self {
+        Self(Timer::new(duration, TimerMode::Once))
     }
 }
 
 #[derive(Component)]
 pub struct VisibilityTimer(Timer);
-
 impl VisibilityTimer {
-    pub fn new(time: f32) -> Self {
-        Self(Timer::from_seconds(time, TimerMode::Once))
-    }
-    pub fn remaining(&self) -> std::time::Duration {
-        self.0.remaining()
-    }
-    pub fn from_seconds(seconds: f32) -> Self {
-        Self(Timer::from_seconds(seconds, TimerMode::Once))
+    pub fn new(duration: Duration) -> Self {
+        Self(Timer::new(duration, TimerMode::Once))
     }
 }
 

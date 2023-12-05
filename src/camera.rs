@@ -26,7 +26,15 @@ fn spawn_camera(mut cmd: Commands) {
         },
         ..default()
     })
-    .insert(ZoomDistance(500.))
+    .insert(FogSettings {
+        color: Color::WHITE,
+        falloff: FogFalloff::Linear {
+            start: 270.,
+            end: 600.,
+        },
+        ..default()
+    })
+    .insert(ZoomDistance(100.))
     .insert(BloomSettings {
         intensity: 0.2,
         ..default()
@@ -70,7 +78,7 @@ fn follow_camera(
 
     let ray = Ray {
         origin: avarage_dog_position,
-        direction: Vec3::new(0.8, 0., 1.),
+        direction: Vec3::new(1.0, 1.0, 1.),
     };
 
     cam_trans.translation = ray.get_point(zoom.0);
