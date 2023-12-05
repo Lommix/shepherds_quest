@@ -18,6 +18,7 @@ use self::{
 
 pub mod animations;
 pub mod dog;
+pub mod llama;
 pub mod physics;
 pub mod sheep;
 
@@ -29,16 +30,17 @@ impl Plugin for SheepPlugin {
             sheep::SheepBehaviorPlugin,
             animations::AnimalAnimationPlugin,
             physics::AnimalPhysicsPlugin,
+            llama::LlamaPlugin,
         ));
-        app.add_systems(Update, (bounce));
         app.insert_resource(AnimalBehavior {
-            alignment: 0.5,
+            alignment: 1.0,
             cohesion: 1.0,
-            separation: 0.6,
-            speed: 20.0,
+            separation: 0.5,
+            speed: 23.0,
             vision: 20.0,
             fear: 1.0,
-            motivation: 0.01,
+            motivation: 0.1,
+            dog_speed: 50.0,
         });
     }
 }
@@ -52,44 +54,5 @@ pub struct AnimalBehavior {
     pub vision: f32,
     pub fear: f32,
     pub motivation: f32,
-}
-
-fn bounce(
-    mut cmd: Commands,
-    query: Query<
-        (&Children),
-        (
-            With<SheepTag>,
-            Added<Children>,
-            Without<Animator<Transform>>,
-        ),
-    >,
-) {
-    query.iter().for_each(|(children)| {
-        let random = rand::random::<u64>() % 50;
-        let tween = Tween::new(
-            EaseFunction::QuadraticOut,
-            Duration::from_millis(300 + random),
-            TransformPositionLens {
-                start: Vec3::new(0., 0., 0.),
-                end: Vec3::new(0., 0., 2.),
-            },
-        )
-        .with_repeat_strategy(RepeatStrategy::MirroredRepeat)
-        .with_repeat_count(RepeatCount::Infinite);
-
-        cmd.entity(children[0]).insert(Animator::new(tween));
-    });
-}
-
-fn load_animation(
-    mut query: Query<&mut AnimationPlayer, Added<AnimationPlayer>>,
-    server: Res<AssetServer>,
-    gltf: Res<Assets<Gltf>>,
-) {
-    query.iter_mut().for_each(|mut player| {
-        let animation = server.load("models/models.glb#Animation4");
-        let random = (rand::random::<f32>() * 0.2) + 0.9;
-        player.play(animation.clone()).repeat().set_speed(random);
-    });
+    pub dog_speed: f32,
 }

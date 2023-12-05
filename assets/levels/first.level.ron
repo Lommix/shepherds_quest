@@ -1,17 +1,14 @@
 (
-    sheeps_per_spawn: 30,
-    layout:
-"#############
-#-D---T----G#
-#-----T--T-G#
-#-SS-----T-G#
-#-SS-----T-G#
-#-SS-----T-G#
-#-SS-----T-G#
-#-SS-----T-G#
-#-SS-----T-G#
-#-SS-----T-G#
-#-SS--T--T-G#
-#-SS--T----G#
-#############",
+    name: "Sheep Invasion",
+    intro: "Sheperd Bob: Oh no! The sheeps are escaping! Help me to get them back into the stable! Now is your time to shine, Henk!",
+    win: "Good boy! The sheeps are save (mostly)",
+    loose: "Bad boy! You messed up the sheeps!",
+    llama_stomp_rate: 5,
+    sheeps_per_spawn: 10,
+    layout: "
+#########
+#D----T-#
+#SSS--LG#
+#SSS--T-#
+#########",
 )

@@ -15,6 +15,9 @@ impl Plugin for CameraPlugin {
 #[derive(Component)]
 struct ZoomDistance(f32);
 
+#[derive(Component)]
+pub struct MainCamera;
+
 fn spawn_camera(mut cmd: Commands) {
     cmd.spawn(Camera3dBundle {
         camera: Camera {
@@ -28,7 +31,13 @@ fn spawn_camera(mut cmd: Commands) {
         intensity: 0.2,
         ..default()
     })
+    .insert(MainCamera)
     .insert(Name::new("camera"));
+
+    cmd.insert_resource(AmbientLight {
+        color: Color::WHITE,
+        brightness: 0.2,
+    });
 }
 
 fn zoom(mut query: Query<&mut ZoomDistance>, mut wheel_events: EventReader<MouseWheel>) {
@@ -63,6 +72,7 @@ fn follow_camera(
         origin: avarage_dog_position,
         direction: Vec3::new(0.8, 0., 1.),
     };
+
     cam_trans.translation = ray.get_point(zoom.0);
     cam_trans.look_at(avarage_dog_position, Vec3::Z);
 }

@@ -8,7 +8,7 @@ use bevy_rapier2d::prelude::*;
 
 #[cfg(not(debug_assertions))]
 use bevy_embedded_assets::EmbeddedAssetPlugin;
-use bevy_nine_slice_ui::NineSlicePlugin;
+use bevy_nine_slice_ui::NineSliceUiPlugin;
 use state::GameAssets;
 
 mod animals;
@@ -25,10 +25,10 @@ mod util;
 fn main() {
     App::new()
         .add_plugins((
-            #[cfg(not(debug_assertions))]
-            EmbeddedAssetPlugin {
-                mode: bevy_embedded_assets::PluginMode::ReplaceDefault,
-            },
+            // #[cfg(not(debug_assertions))]
+            // EmbeddedAssetPlugin {
+            //     mode: bevy_embedded_assets::PluginMode::ReplaceDefault,
+            // },
             #[cfg(debug_assertions)]
             debug::DebugPlugin,
             DefaultPlugins
@@ -49,7 +49,7 @@ fn main() {
                 }),
             WorldInspectorPlugin::default(),
             RapierPhysicsPlugin::<()>::default(),
-            NineSlicePlugin::default(),
+            NineSliceUiPlugin::default(),
             controls::ControlPlugin,
             animals::SheepPlugin,
             bevy_tweening::TweeningPlugin,

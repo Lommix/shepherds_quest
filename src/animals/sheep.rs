@@ -1,10 +1,10 @@
-use bevy::{prelude::*, gltf::Gltf};
+use bevy::{gltf::Gltf, prelude::*};
 use bevy_inspector_egui::{inspector_options::ReflectInspectorOptions, InspectorOptions};
 use bevy_rapier2d::prelude::*;
 
-use crate::state::{AllowedState, GameState};
+use crate::{state::{AllowedState, GameState}, util::Cooldown};
 
-use super::{dog::DogTag, physics::MoveTo, AnimalBehavior, animations::AnimalState};
+use super::{animations::AnimalState, dog::DogTag, physics::MoveTo, AnimalBehavior};
 
 pub struct SheepBehaviorPlugin;
 impl Plugin for SheepBehaviorPlugin {
@@ -23,12 +23,13 @@ pub struct SheepBundle {
     pub velocity: Velocity,
     pub scene: Handle<Scene>,
     pub gltf: Handle<Gltf>,
-    pub state : AnimalState,
+    pub state: AnimalState,
     pub sheep_tag: SheepTag,
     pub visibility: Visibility,
     pub inherited_visibility: InheritedVisibility,
     pub view_visibility: ViewVisibility,
     pub transform: Transform,
+    pub impuls: ExternalImpulse,
     pub global_transform: GlobalTransform,
     pub name: Name,
     pub mass: ColliderMassProperties,
@@ -46,6 +47,7 @@ impl Default for SheepBundle {
             state: AnimalState::Idle,
             name: Name::new("sheep"),
             sheep_tag: SheepTag,
+            impuls: ExternalImpulse::default(),
             visibility: Visibility::Inherited,
             inherited_visibility: InheritedVisibility::HIDDEN,
             view_visibility: ViewVisibility::HIDDEN,
@@ -59,7 +61,7 @@ impl Default for SheepBundle {
 fn sheep_flocking(
     mut velocities: Query<&mut Velocity>,
     dogs: Query<(Entity), With<DogTag>>,
-    sheeps: Query<(Entity), With<SheepTag>>,
+    sheeps: Query<(Entity), ( With<SheepTag>, Without<Cooldown> )>,
     move_to: Query<&MoveTo>,
     positions: Query<&Transform>,
     rapier_context: Res<RapierContext>,
@@ -121,7 +123,7 @@ fn sheep_flocking(
                 let position = positions.get(ent).unwrap().translation.truncate();
                 let distance = position.distance(transform.translation.truncate());
 
-                if distance > sheep_behavior.vision * 5. {
+                if distance > sheep_behavior.vision * 8. {
                     return None;
                 }
 

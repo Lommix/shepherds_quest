@@ -32,6 +32,17 @@ impl AssetLoader for LevelAssetLoader {
             reader.read_to_end(&mut bytes).await.unwrap();
             let mut asset = ron::de::from_bytes::<LevelAsset>(bytes.as_slice()).unwrap();
             let parsed = LayoutIterator::new(&asset).collect::<Result<Vec<_>, _>>()?;
+
+            let size = parsed
+                .iter()
+                .max_by(|(a, _), (b, _)| {
+                    let a = a.x + a.y;
+                    let b = b.x + b.y;
+                    a.partial_cmp(&b).unwrap()
+                })
+                .expect("Empty level");
+
+            asset.size = Some(size.0);
             asset.parsed = Some(parsed);
             Ok(asset)
         })
@@ -44,9 +55,17 @@ impl AssetLoader for LevelAssetLoader {
 #[derive(Asset, TypePath, Debug, Deserialize)]
 pub struct LevelAsset {
     pub sheeps_per_spawn: usize,
+    pub name: String,
+    pub intro: String,
+    pub win: String,
+    pub loose: String,
+    pub llama_stomp_rate: f32,
+
     pub layout: String,
     #[serde(skip)]
     pub parsed: Option<Vec<(Vec2, Tiles)>>,
+    #[serde(skip)]
+    pub size: Option<Vec2>,
 }
 
 #[derive(Debug)]
@@ -57,6 +76,7 @@ pub enum Tiles {
     Dog,
     Trap,
     Goal,
+    Llama,
 }
 
 struct LayoutIterator<'a> {
@@ -95,6 +115,11 @@ impl Iterator for LayoutIterator<'_> {
             Some(b'\n') => {
                 self.advance_row();
                 self.next()
+            }
+            Some(b'L') => {
+                let pos = Vec2::new(self.row as f32, self.col as f32) * TILE_SIZE;
+                self.advance_col();
+                Some(Ok((pos, Tiles::Llama)))
             }
             Some(b'G') => {
                 let pos = Vec2::new(self.row as f32, self.col as f32) * TILE_SIZE;

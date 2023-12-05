@@ -4,7 +4,10 @@ use bevy::prelude::*;
 pub struct UtilPlugin;
 impl Plugin for UtilPlugin {
     fn build(&self, app: &mut App) {
-        app.add_systems(Update, (lifetime_system, cooldown_system));
+        app.add_systems(
+            Update,
+            (lifetime_system, cooldown_system, visibility_timer_system),
+        );
     }
 }
 
@@ -12,6 +15,21 @@ impl Plugin for UtilPlugin {
 pub struct LifeTime(Timer);
 
 impl LifeTime {
+    pub fn new(time: f32) -> Self {
+        Self(Timer::from_seconds(time, TimerMode::Once))
+    }
+    pub fn remaining(&self) -> std::time::Duration {
+        self.0.remaining()
+    }
+    pub fn from_seconds(seconds: f32) -> Self {
+        Self(Timer::from_seconds(seconds, TimerMode::Once))
+    }
+}
+
+#[derive(Component)]
+pub struct VisibilityTimer(Timer);
+
+impl VisibilityTimer {
     pub fn new(time: f32) -> Self {
         Self(Timer::from_seconds(time, TimerMode::Once))
     }
@@ -38,6 +56,32 @@ fn lifetime_system(mut cmd: Commands, mut life_q: Query<(Entity, &mut LifeTime)>
             cmd.entity(ent).despawn_recursive();
         });
     });
+}
+
+fn visibility_timer_system(
+    mut cmd: Commands,
+    mut visibility_q: Query<(Entity, &mut Visibility, &mut VisibilityTimer)>,
+    time: Res<Time>,
+) {
+    visibility_q
+        .iter_mut()
+        .for_each(|(ent, mut visibilty, mut timer)| {
+            timer.0.tick(time.delta());
+
+            match timer.0.finished() {
+                true => {
+                    timer.0.finished().then(|| {
+                        *visibilty = Visibility::Hidden;
+                    });
+                }
+                false => {
+                    timer.0.finished().then(|| {
+                        *visibilty = Visibility::Visible;
+                    });
+                }
+                _ => {}
+            }
+        });
 }
 
 fn cooldown_system(

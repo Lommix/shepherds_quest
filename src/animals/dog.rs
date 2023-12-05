@@ -5,14 +5,12 @@ use bevy_rapier2d::{
     geometry::{Collider, ColliderMassProperties},
 };
 
-use crate::state::{AllowedState, GameState};
-
 use super::{animations::AnimalState, physics::MoveTo, AnimalBehavior};
+use crate::state::{AllowedState, GameState};
 
 pub struct DogPlugin;
 impl Plugin for DogPlugin {
     fn build(&self, app: &mut App) {
-        // app.add_systems(OnEnter(GameState::Game), spawn_debug_dog);
         app.add_systems(Update, move_dogs);
     }
 }
@@ -57,7 +55,7 @@ impl Default for DogBundle {
             global_transform: GlobalTransform::IDENTITY,
             name: Name::new("dog"),
             damping: Damping {
-                linear_damping: 1.,
+                linear_damping: 3.,
                 angular_damping: 1.,
             },
             allowed_game_states: AllowedState::new(GameState::Game),
@@ -66,20 +64,11 @@ impl Default for DogBundle {
     }
 }
 
-fn spawn_debug_dog(mut cmd: Commands, server: Res<AssetServer>) {
-    let transform = Transform::from_translation(Vec3::new(0., -100., 0.));
-    cmd.spawn(DogBundle {
-        scene: server.load("models/pug.glb#Scene0"),
-        gltf: server.load("models/pug.glb"),
-        transform,
-        ..default()
-    });
-}
-
 fn move_dogs(
     mut cmd: Commands,
     mut query: Query<(Entity, &mut Velocity, &MoveTo, &Transform), With<DogTag>>,
     animal_behavior: Res<AnimalBehavior>,
+    time: Res<Time>,
 ) {
     query
         .iter_mut()
@@ -89,10 +78,17 @@ fn move_dogs(
 
             if distance < 2.0 {
                 cmd.entity(entity).remove::<MoveTo>();
-                velocity.linvel = Vec2::ZERO;
                 return;
             }
 
-            velocity.linvel = direction.normalize_or_zero() * animal_behavior.speed * 3.;
+            velocity.linvel= direction.normalize_or_zero() * animal_behavior.dog_speed;
+            // velocity.linvel = (velocity.linvel.normalize_or_zero()
+            //     + direction.normalize_or_zero()
+            //         * time.delta_seconds()
+            //         * velocity.linvel.length().max(1.)
+            //         / DOG_TURN_SPEED)
+            //     .normalize_or_zero()
+            //     * animal_behavior.speed
+            //     * 3.;
         });
 }

@@ -1,10 +1,13 @@
 use std::time::Duration;
 
 use bevy::prelude::*;
-use bevy_nine_slice_ui::{NineSliceMaterialBundle, NineSliceTexture};
+use bevy_nine_slice_ui::{NineSliceUiMaterialBundle, NineSliceUiTexture};
 use bevy_tweening::{lens::*, *};
 
-use crate::state::{GameState, AllowedState};
+use crate::{
+    level::LoadLevelEvent,
+    state::{AllowedState, GameState},
+};
 
 pub struct MenuPlugin;
 impl Plugin for MenuPlugin {
@@ -14,52 +17,45 @@ impl Plugin for MenuPlugin {
     }
 }
 
+const CAMPAIGN_LEVELS: [&str; 4] = [
+    "levels/first.level.ron",
+    "levels/second.level.ron",
+    "levels/third.level.ron",
+    "levels/fourth.level.ron",
+];
+
 #[derive(Component)]
-pub struct PlayButton;
+pub struct LevelSelectorButton(usize);
 
 fn start_game(
-    query: Query<&Interaction, (With<PlayButton>, Changed<Interaction>)>,
-    mut states: ResMut<NextState<GameState>>,
+    mut events: EventWriter<LoadLevelEvent>,
+    query: Query<(&Interaction, &LevelSelectorButton), Changed<Interaction>>,
+    server: Res<AssetServer>,
 ) {
-    query.iter().for_each(|interaction| match *interaction {
-        Interaction::Pressed => {
-            info!("starting game");
-            states.set(GameState::Game);
-        }
-        _ => {}
-    });
+    query
+        .iter()
+        .for_each(|(interaction, selection)| match *interaction {
+            Interaction::Pressed => {
+                events.send(LoadLevelEvent::new(
+                    server.load(CAMPAIGN_LEVELS[selection.0]),
+                ));
+            }
+            _ => {}
+        });
 }
 
 fn hover_effect(
     mut cmd: Commands,
-    query: Query<(Entity, &Interaction)>,
-    animated: Query<Entity, With<Animator<Transform>>>,
+    mut query: Query<(Entity, &Interaction, &mut NineSliceUiTexture)>,
 ) {
     query
-        .iter()
-        .for_each(|(ent, interaction)| match interaction {
+        .iter_mut()
+        .for_each(|(ent, interaction, mut texture)| match interaction {
             Interaction::Hovered => {
-                if animated.get(ent).is_ok() {
-                    return;
-                }
-                let tween = Tween::new(
-                    EaseFunction::SineInOut,
-                    Duration::from_millis(500),
-                    TransformScaleLens {
-                        start: Vec3::ONE,
-                        end: Vec3::ONE * 1.1,
-                    },
-                )
-                .with_repeat_count(RepeatCount::Infinite)
-                .with_repeat_strategy(RepeatStrategy::MirroredRepeat);
-                cmd.entity(ent).insert(Animator::new(tween));
+                texture.blend_mix = 0.1;
             }
             Interaction::None => {
-                if animated.get(ent).is_err() {
-                    return;
-                }
-
-                cmd.entity(ent).remove::<Animator<Transform>>();
+                texture.blend_mix = 0.;
             }
             _ => {}
         })
@@ -82,8 +78,8 @@ fn spawn_menue(mut cmd: Commands, server: Res<AssetServer>) {
         cmd.spawn(NodeBundle {
             style: Style {
                 display: Display::Flex,
-                width: Val::Px(300.),
-                height: Val::Px(300.),
+                width: Val::Px(500.),
+                height: Val::Percent(100.),
                 justify_content: JustifyContent::Center,
                 align_items: AlignItems::Center,
                 flex_direction: FlexDirection::Column,
@@ -100,18 +96,38 @@ fn spawn_menue(mut cmd: Commands, server: Res<AssetServer>) {
                 text: Text::from_section(
                     "Shepherd's Quest",
                     TextStyle {
-                        font_size: 20.,
+                        font_size: 40.,
                         color: Color::WHITE,
                         ..default()
                     },
                 ),
                 style: Style {
                     display: Display::Flex,
-                    width: Val::Px(100.),
+                    width: Val::Auto,
                     height: Val::Px(50.),
-                    padding: UiRect::bottom(Val::Px(50.)),
-                    justify_content: JustifyContent::Center,
-                    align_items: AlignItems::Center,
+                    margin: UiRect::vertical(Val::Px(20.)),
+                    align_self: AlignSelf::Center,
+                    ..default()
+                },
+                ..default()
+            });
+
+            cmd.spawn(TextBundle {
+                text: Text::from_section(
+                    "Help Hank the pug to fullfill his life long dream of becoming a Shepherd's dog!",
+                    TextStyle {
+                        font_size: 16.,
+                        color: Color::WHITE,
+                        ..default()
+                    },
+                ),
+                style: Style {
+                    display: Display::Flex,
+                    width: Val::Px(300.),
+                    height: Val::Px(50.),
+                    margin: UiRect::vertical(Val::Px(20.)),
+                    padding : UiRect::all(Val::Px(10.)),
+                    align_self: AlignSelf::Center,
                     ..default()
                 },
                 ..default()
@@ -120,23 +136,55 @@ fn spawn_menue(mut cmd: Commands, server: Res<AssetServer>) {
             cmd.spawn(ButtonBundle {
                 style: Style {
                     display: Display::Flex,
-                    width: Val::Px(100.),
+                    width: Val::Px(200.),
                     height: Val::Px(50.),
+                    margin: UiRect::vertical(Val::Px(5.)),
                     justify_content: JustifyContent::Center,
                     align_items: AlignItems::Center,
                     ..default()
                 },
                 ..default()
             })
-            .insert(PlayButton)
-            .insert(NineSliceTexture::from_slice(
+            .insert(LevelSelectorButton(0))
+            .insert(NineSliceUiTexture::from_slice(
                 server.load("sprites/ui.png"),
                 Rect::new(48., 0., 96., 48.),
             ))
             .with_children(|cmd| {
                 cmd.spawn(TextBundle {
                     text: Text::from_section(
-                        "Play",
+                        "Level 1",
+                        TextStyle {
+                            font_size: 20.,
+                            color: Color::WHITE,
+                            ..default()
+                        },
+                    ),
+                    ..default()
+                });
+            });
+
+            cmd.spawn(ButtonBundle {
+                style: Style {
+                    display: Display::Flex,
+                    width: Val::Px(200.),
+                    height: Val::Px(50.),
+                    margin: UiRect::vertical(Val::Px(5.)),
+                    justify_content: JustifyContent::Center,
+                    align_items: AlignItems::Center,
+                    ..default()
+                },
+                ..default()
+            })
+            .insert(LevelSelectorButton(0))
+            .insert(NineSliceUiTexture::from_slice(
+                server.load("sprites/ui.png"),
+                Rect::new(48., 0., 96., 48.),
+            ))
+            .with_children(|cmd| {
+                cmd.spawn(TextBundle {
+                    text: Text::from_section(
+                        "Custom Level",
                         TextStyle {
                             font_size: 20.,
                             color: Color::WHITE,

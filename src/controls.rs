@@ -1,6 +1,9 @@
 use bevy::{input::mouse::MouseButtonInput, prelude::*, window::PrimaryWindow};
 
-use crate::animals::{dog::DogTag, physics::MoveTo};
+use crate::{
+    animals::{dog::DogTag, physics::MoveTo},
+    camera::MainCamera,
+};
 
 pub struct ControlPlugin;
 impl Plugin for ControlPlugin {
@@ -28,7 +31,7 @@ impl MapClickEvent {
 fn click_event(
     mut mouse_click: EventReader<MouseButtonInput>,
     mut events: EventWriter<MapClickEvent>,
-    camera: Query<(&Camera, &GlobalTransform)>,
+    camera: Query<(&Camera, &GlobalTransform), With<MainCamera>>,
     windows: Query<&Window>,
 ) {
     let Ok((cam, cam_trans)) = camera.get_single() else {
@@ -81,7 +84,6 @@ fn command_dog(
     click_events.read().for_each(|event| {
         dogs.iter_mut().for_each(|(ent, mut move_to)| {
             if event.button() == MouseButton::Right {
-
                 if let Some(mut move_to) = move_to {
                     move_to.set(event.translation().truncate());
                 } else {
