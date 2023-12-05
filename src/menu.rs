@@ -5,7 +5,7 @@ use bevy_nine_slice_ui::{NineSliceUiMaterialBundle, NineSliceUiTexture};
 use bevy_tweening::{lens::*, *};
 
 use crate::{
-    level::LoadLevelEvent,
+    level::{builder::LoadLevelEvent, CAMPAIGN_LEVELS},
     state::{AllowedState, GameState},
 };
 
@@ -17,18 +17,12 @@ impl Plugin for MenuPlugin {
     }
 }
 
-const CAMPAIGN_LEVELS: [&str; 4] = [
-    "levels/first.level.ron",
-    "levels/second.level.ron",
-    "levels/third.level.ron",
-    "levels/fourth.level.ron",
-];
-
 #[derive(Component)]
-pub struct LevelSelectorButton(usize);
+pub struct LevelSelectorButton(pub usize);
 
 fn start_game(
     mut events: EventWriter<LoadLevelEvent>,
+    mut state: ResMut<NextState<GameState>>,
     query: Query<(&Interaction, &LevelSelectorButton), Changed<Interaction>>,
     server: Res<AssetServer>,
 ) {
@@ -36,6 +30,7 @@ fn start_game(
         .iter()
         .for_each(|(interaction, selection)| match *interaction {
             Interaction::Pressed => {
+                state.set(GameState::GameOver);
                 events.send(LoadLevelEvent::new(
                     server.load(CAMPAIGN_LEVELS[selection.0]),
                 ));

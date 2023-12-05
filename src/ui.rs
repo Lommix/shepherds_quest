@@ -1,7 +1,6 @@
 use std::time::Duration;
 
-use super::Score;
-use crate::state::{AllowedState, GameState};
+use crate::{state::{AllowedState, GameState}, level::Score};
 use bevy::{
     core_pipeline::clear_color::ClearColorConfig,
     prelude::*,

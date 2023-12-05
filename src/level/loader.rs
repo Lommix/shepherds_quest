@@ -59,6 +59,7 @@ pub struct LevelAsset {
     pub intro: String,
     pub win: String,
     pub loose: String,
+    pub win_percent: f32,
     pub llama_stomp_rate: f32,
 
     pub layout: String,

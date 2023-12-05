@@ -67,13 +67,14 @@ impl Default for LLamaBundle {
 fn llama_stomp(
     mut cmd: Commands,
     mut query: Query<(Entity, &mut AnimalState, &Children), (With<LLamaTag>, Without<Cooldown>)>,
+    level: Query<&Handle<LevelAsset>>,
     positions: Query<&Transform>,
     sheeps: Query<With<SheepTag>>,
     rapier_context: Res<RapierContext>,
     current_level: Res<CurrentLevel>,
     levels: Res<Assets<LevelAsset>>,
 ) {
-    let Some(handle) = current_level.level() else {
+    let Ok(handle) = level.get_single() else {
         debug!("wtf you doing");
         return;
     };

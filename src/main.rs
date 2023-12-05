@@ -15,20 +15,22 @@ mod animals;
 mod camera;
 mod controls;
 mod debug;
-mod gameplay;
+mod goal;
 mod level;
 mod menu;
 mod ron_loader;
 mod state;
+mod trap;
+mod ui;
 mod util;
 
 fn main() {
     App::new()
         .add_plugins((
-            // #[cfg(not(debug_assertions))]
-            // EmbeddedAssetPlugin {
-            //     mode: bevy_embedded_assets::PluginMode::ReplaceDefault,
-            // },
+            #[cfg(not(debug_assertions))]
+            EmbeddedAssetPlugin {
+                mode: bevy_embedded_assets::PluginMode::ReplaceDefault,
+            },
             #[cfg(debug_assertions)]
             debug::DebugPlugin,
             DefaultPlugins
@@ -57,11 +59,10 @@ fn main() {
             menu::MenuPlugin,
             state::StatePlugin,
             camera::CameraPlugin,
-            gameplay::GameplayPlugin,
             util::UtilPlugin,
             level::LevelPlugin,
         ))
-        // .add_plugins(RapierDebugRenderPlugin::default())
+        .add_plugins((trap::TrapPlugin, goal::GoalPlugin, ui::UiPlugin))
         .add_systems(Startup, load_models)
         .insert_resource(RapierConfiguration {
             gravity: Vec2::ZERO,

@@ -3,23 +3,55 @@ use bevy_rapier2d::{dynamics::RigidBody, geometry::Collider};
 
 use crate::{
     animals::{dog::DogBundle, llama::LLamaBundle, physics::MoveTo, sheep::SheepBundle},
-    gameplay::{
-        goal::{Goal, GoalBundle},
-        trap::{Trap, TrapBundle},
-        ui::Dialog,
-    },
+    goal::{Goal, GoalBundle},
+    level::LevelBundle,
+    menu::LevelSelectorButton,
     state::{AllowedState, GameState},
+    trap::{Trap, TrapBundle},
+    ui::Dialog,
 };
 
 use super::{
     loader::{LevelAsset, Tiles, TILE_SIZE},
-    LevelLoaded, TileBundle,
+    CurrentLevel, LevelLoaded, Score, TileBundle, CAMPAIGN_LEVELS,
 };
+
 pub struct LevelBuilderPlugin;
 impl Plugin for LevelBuilderPlugin {
     fn build(&self, app: &mut App) {
         app.add_systems(Update, load_level);
+        app.add_event::<LoadLevelEvent>();
+        app.add_systems(Update, start_level);
     }
+}
+
+#[derive(Event)]
+pub struct LoadLevelEvent(Handle<LevelAsset>);
+impl LoadLevelEvent {
+    pub fn new(level: Handle<LevelAsset>) -> Self {
+        Self(level)
+    }
+}
+
+fn start_level(
+    mut cmd: Commands,
+    mut events: EventReader<LoadLevelEvent>,
+    mut state: ResMut<NextState<GameState>>,
+    mut score: ResMut<Score>,
+) {
+    let Some(event) = events.read().next() else {
+        return;
+    };
+
+    info!("loading level {:?}", &event.0);
+
+    score.reset();
+    cmd.spawn(LevelBundle {
+        level: event.0.clone(),
+        ..default()
+    });
+
+    state.set(GameState::Game);
 }
 
 fn load_level(

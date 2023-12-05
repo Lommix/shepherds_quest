@@ -1,10 +1,11 @@
 (
-    name: "Sheep Invasion",
+    name: "Pug in training",
     intro: "Sheperd Bob: Oh no! The sheeps are escaping! Help me to get them back into the stable! Now is your time to shine, Henk!",
-    win: "Good boy! The sheeps are save (mostly)",
-    loose: "Bad boy! You messed up the sheeps!",
+    win: "Good boy! Good boy! Maybe pugs can best sheeps after all!",
+    loose: "Bad boy! You messed up! Maybe I should sell you to the butcher",
     llama_stomp_rate: 5,
     sheeps_per_spawn: 10,
+    win_percent: 50,
     layout: "
 #########
 #D----T-#

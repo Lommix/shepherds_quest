@@ -7,10 +7,9 @@ use bevy_rapier2d::{
 
 use crate::{
     animals::{animations::AnimalState, sheep::SheepTag},
-    util::LifeTime,
+    util::LifeTime, level::Score,
 };
 
-use super::Score;
 
 pub const SUCCESS_GLOW: Handle<StandardMaterial> = Handle::weak_from_u128(12561396483470153565671);
 pub const FAIL_GLOW: Handle<StandardMaterial> = Handle::weak_from_u128(125613964543455646571);

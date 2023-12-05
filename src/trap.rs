@@ -7,13 +7,11 @@ use bevy_rapier2d::{
 
 use crate::{
     animals::{animations::AnimalState, sheep::SheepTag},
+    level::Score,
     util::LifeTime,
 };
 
-use super::{
-    goal::{FAIL_GLOW, GLOW_MESH},
-    Score,
-};
+use super::goal::{FAIL_GLOW, GLOW_MESH};
 pub struct TrapPlugin;
 impl Plugin for TrapPlugin {
     fn build(&self, app: &mut App) {
