@@ -14,7 +14,7 @@ use bevy::{
     },
     time::common_conditions::on_timer,
 };
-use bevy_aseprite::{anim::AsepriteAnimation, AsepriteBundle, AsepriteSliceBundle};
+use bevy_aseprite::{AsepriteBundle};
 use bevy_nine_slice_ui::{NineSliceUiMaterialBundle, NineSliceUiTexture};
 
 const PORTRAIT_LAYER: RenderLayers = RenderLayers::layer(2);

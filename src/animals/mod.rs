@@ -1,20 +1,13 @@
-use std::time::Duration;
 
-use bevy::{gltf::Gltf, prelude::*};
-use bevy_aseprite::{slice::AsepriteSlice, Aseprite};
-use bevy_rapier2d::{
-    control::KinematicCharacterController,
-    dynamics::{RigidBody, Velocity},
-    geometry::{Collider, ColliderMassProperties, Sensor},
-};
-use bevy_tweening::{lens::*, *};
 
-use crate::state::GameState;
+use bevy::{prelude::*};
 
-use self::{
-    physics::MoveTo,
-    sheep::{SheepBundle, SheepTag},
-};
+
+
+
+
+
+
 
 pub mod animations;
 pub mod dog;

@@ -12,7 +12,7 @@ impl Plugin for DebugPlugin {
 }
 
 fn debug_gui(
-    mut cmd: Commands,
+    _cmd: Commands,
     mut egui_context: EguiContexts,
     mut sheep_behavior: ResMut<AnimalBehavior>,
 ) {

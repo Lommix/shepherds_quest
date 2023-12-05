@@ -77,9 +77,9 @@ fn spawn_trap(
 fn watch_trap_enter(
     mut cmd: Commands,
     mut score: ResMut<Score>,
-    mut meshes: ResMut<Assets<Mesh>>,
+    _meshes: ResMut<Assets<Mesh>>,
     goals: Query<Entity, With<Trap>>,
-    sheeps: Query<(Entity), With<SheepTag>>,
+    sheeps: Query<Entity, With<SheepTag>>,
     rapier_context: Res<RapierContext>,
 ) {
     goals.iter().for_each(|entity| {

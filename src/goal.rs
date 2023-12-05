@@ -104,9 +104,9 @@ fn spawn_goal(
 fn watch_goal_enter(
     mut cmd: Commands,
     mut score: ResMut<Score>,
-    mut meshes: ResMut<Assets<Mesh>>,
+    _meshes: ResMut<Assets<Mesh>>,
     goals: Query<Entity, With<Goal>>,
-    sheeps: Query<(Entity), With<SheepTag>>,
+    sheeps: Query<Entity, With<SheepTag>>,
     rapier_context: Res<RapierContext>,
 ) {
     goals.iter().for_each(|entity| {

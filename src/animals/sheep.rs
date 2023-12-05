@@ -1,5 +1,5 @@
 use bevy::{gltf::Gltf, prelude::*};
-use bevy_inspector_egui::{inspector_options::ReflectInspectorOptions, InspectorOptions};
+
 use bevy_rapier2d::prelude::*;
 
 use crate::{state::{AllowedState, GameState}, util::Cooldown};
@@ -60,14 +60,14 @@ impl Default for SheepBundle {
 }
 fn sheep_flocking(
     mut velocities: Query<&mut Velocity>,
-    dogs: Query<(Entity), With<DogTag>>,
-    sheeps: Query<(Entity), ( With<SheepTag>, Without<Cooldown> )>,
+    dogs: Query<Entity, With<DogTag>>,
+    sheeps: Query<Entity, ( With<SheepTag>, Without<Cooldown> )>,
     move_to: Query<&MoveTo>,
     positions: Query<&Transform>,
     rapier_context: Res<RapierContext>,
     sheep_behavior: Res<AnimalBehavior>,
 ) {
-    sheeps.iter().for_each(|(entity)| {
+    sheeps.iter().for_each(|entity| {
         let transform = positions.get(entity).unwrap();
         let collider = Collider::ball(sheep_behavior.vision);
         let mut sheeps_in_range = Vec::new();
@@ -108,7 +108,7 @@ fn sheep_flocking(
                 .map(|ent| {
                     let position = positions.get(*ent).unwrap().translation.truncate();
                     let distance = position.distance(transform.translation.truncate());
-                    let direction = (transform.translation.truncate() - position);
+                    let direction = transform.translation.truncate() - position;
                     direction / distance
                 })
                 .sum::<Vec2>()
@@ -117,7 +117,7 @@ fn sheep_flocking(
             acc_direction += separation * sheep_behavior.separation;
         }
 
-        let flee = (dogs
+        let flee = dogs
             .iter()
             .filter_map(|ent| {
                 let position = positions.get(ent).unwrap().translation.truncate();
@@ -127,11 +127,11 @@ fn sheep_flocking(
                     return None;
                 }
 
-                let direction = (transform.translation.truncate() - position);
+                let direction = transform.translation.truncate() - position;
                 Some(direction / distance)
             })
             .sum::<Vec2>()
-            / dogs.iter().len() as f32);
+            / dogs.iter().len() as f32;
 
         acc_direction += flee.normalize_or_zero() * sheep_behavior.fear;
 

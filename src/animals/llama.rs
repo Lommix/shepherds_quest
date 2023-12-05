@@ -2,7 +2,7 @@ use std::time::Duration;
 
 use bevy::{gltf::Gltf, prelude::*};
 use bevy_rapier2d::{
-    dynamics::{ExternalImpulse, RigidBody},
+    dynamics::{ExternalImpulse},
     geometry::Collider,
     pipeline::QueryFilter,
     plugin::RapierContext,
@@ -71,7 +71,7 @@ fn llama_stomp(
     positions: Query<&Transform>,
     sheeps: Query<With<SheepTag>>,
     rapier_context: Res<RapierContext>,
-    current_level: Res<CurrentLevel>,
+    _current_level: Res<CurrentLevel>,
     levels: Res<Assets<LevelAsset>>,
 ) {
     let Ok(handle) = level.get_single() else {
@@ -85,7 +85,7 @@ fn llama_stomp(
 
     query
         .iter_mut()
-        .for_each(|(entity, mut animal_state, children)| {
+        .for_each(|(entity, _animal_state, children)| {
             let Ok(transform) = positions.get(entity) else {
                 return;
             };

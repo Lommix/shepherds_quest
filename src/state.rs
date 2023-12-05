@@ -1,4 +1,4 @@
-use bevy::{asset::LoadState, gltf::Gltf, prelude::*};
+use bevy::{asset::LoadState, prelude::*};
 
 pub struct StatePlugin;
 

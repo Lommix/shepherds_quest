@@ -29,7 +29,7 @@ fn check_progress(
     levels: Res<Assets<LevelAsset>>,
     mut cmd: Commands,
     mut dialog: Query<&mut Text, With<Dialog>>,
-    mut state: ResMut<NextState<GameState>>,
+    _state: ResMut<NextState<GameState>>,
     mut win: EventWriter<LevelWon>,
     mut loose: EventWriter<LevelLost>,
 ) {

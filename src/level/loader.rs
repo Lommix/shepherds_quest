@@ -4,7 +4,7 @@ use bevy::{
 };
 use serde::Deserialize;
 
-use crate::state::{AllowedState, GameState};
+
 pub const TILE_SIZE: f32 = 32.;
 
 pub struct LevelLoaderPlugin;
@@ -24,8 +24,8 @@ impl AssetLoader for LevelAssetLoader {
     fn load<'a>(
         &'a self,
         reader: &'a mut bevy::asset::io::Reader,
-        settings: &'a Self::Settings,
-        load_context: &'a mut bevy::asset::LoadContext,
+        _settings: &'a Self::Settings,
+        _load_context: &'a mut bevy::asset::LoadContext,
     ) -> bevy::utils::BoxedFuture<'a, Result<Self::Asset, Self::Error>> {
         Box::pin(async move {
             let mut bytes = Vec::new();

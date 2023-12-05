@@ -1,7 +1,7 @@
 use bevy::{gltf::Gltf, prelude::*};
 use bevy_rapier2d::dynamics::Velocity;
 
-use super::{dog::DogTag, sheep::SheepTag};
+
 
 pub struct AnimalAnimationPlugin;
 impl Plugin for AnimalAnimationPlugin {
@@ -71,7 +71,7 @@ fn switch_animation(
     mut animation_player: Query<&mut AnimationPlayer>,
     query: Query<(Entity, &Handle<Gltf>, &AnimalState), Changed<AnimalState>>,
     children: Query<&Children>,
-    server: Res<AssetServer>,
+    _server: Res<AssetServer>,
     gltf_assets: Res<Assets<Gltf>>,
 ) {
     query.iter().for_each(|(entity, gltf, state)| {

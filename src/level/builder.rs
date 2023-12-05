@@ -5,15 +5,13 @@ use crate::{
     animals::{dog::DogBundle, llama::LLamaBundle, physics::MoveTo, sheep::SheepBundle},
     goal::{Goal, GoalBundle},
     level::LevelBundle,
-    menu::LevelSelectorButton,
-    state::{AllowedState, GameState},
+    state::{GameState},
     trap::{Trap, TrapBundle},
     ui::Dialog,
 };
 
 use super::{
-    loader::{LevelAsset, Tiles, TILE_SIZE},
-    CurrentLevel, LevelLoaded, Score, TileBundle, CAMPAIGN_LEVELS,
+    loader::{LevelAsset, Tiles, TILE_SIZE}, LevelLoaded, Score, TileBundle,
 };
 
 pub struct LevelBuilderPlugin;
@@ -111,7 +109,7 @@ fn load_level(
                     }
 
                     if matches!(tile, Tiles::Sheep) {
-                        (0..level.sheeps_per_spawn).for_each(|i| {
+                        (0..level.sheeps_per_spawn).for_each(|_i| {
                             let transform = Transform::from_translation(pos.extend(0.));
                             cmd.spawn(SheepBundle {
                                 scene: server.load("models/sheep.glb#Scene0"),

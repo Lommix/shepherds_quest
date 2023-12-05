@@ -59,13 +59,13 @@ fn lifetime_system(mut cmd: Commands, mut life_q: Query<(Entity, &mut LifeTime)>
 }
 
 fn visibility_timer_system(
-    mut cmd: Commands,
+    _cmd: Commands,
     mut visibility_q: Query<(Entity, &mut Visibility, &mut VisibilityTimer)>,
     time: Res<Time>,
 ) {
     visibility_q
         .iter_mut()
-        .for_each(|(ent, mut visibilty, mut timer)| {
+        .for_each(|(_ent, mut visibilty, mut timer)| {
             timer.0.tick(time.delta());
 
             match timer.0.finished() {

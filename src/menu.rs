@@ -1,8 +1,6 @@
-use std::time::Duration;
 
 use bevy::prelude::*;
-use bevy_nine_slice_ui::{NineSliceUiMaterialBundle, NineSliceUiTexture};
-use bevy_tweening::{lens::*, *};
+use bevy_nine_slice_ui::NineSliceUiTexture;
 
 use crate::{
     level::{builder::LoadLevelEvent, CAMPAIGN_LEVELS},
@@ -39,13 +37,10 @@ fn start_game(
         });
 }
 
-fn hover_effect(
-    mut cmd: Commands,
-    mut query: Query<(Entity, &Interaction, &mut NineSliceUiTexture)>,
-) {
+fn hover_effect(_cmd: Commands, mut query: Query<(Entity, &Interaction, &mut NineSliceUiTexture)>) {
     query
         .iter_mut()
-        .for_each(|(ent, interaction, mut texture)| match interaction {
+        .for_each(|(_ent, interaction, mut texture)| match interaction {
             Interaction::Hovered => {
                 texture.blend_mix = 0.1;
             }

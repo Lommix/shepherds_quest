@@ -1,5 +1,5 @@
-use bevy::{gltf::Gltf, input::mouse::MouseMotion, prelude::*, window::PrimaryWindow};
-use bevy_aseprite::{slice::AsepriteSlice, Aseprite};
+use bevy::{gltf::Gltf, prelude::*};
+
 use bevy_rapier2d::{
     dynamics::{Damping, RigidBody, Velocity},
     geometry::{Collider, ColliderMassProperties},
@@ -68,7 +68,7 @@ fn move_dogs(
     mut cmd: Commands,
     mut query: Query<(Entity, &mut Velocity, &MoveTo, &Transform), With<DogTag>>,
     animal_behavior: Res<AnimalBehavior>,
-    time: Res<Time>,
+    _time: Res<Time>,
 ) {
     query
         .iter_mut()

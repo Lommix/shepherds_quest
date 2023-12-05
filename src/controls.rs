@@ -1,4 +1,4 @@
-use bevy::{input::mouse::MouseButtonInput, prelude::*, window::PrimaryWindow};
+use bevy::{input::mouse::MouseButtonInput, prelude::*};
 
 use crate::{
     animals::{dog::DogTag, physics::MoveTo},
@@ -82,7 +82,7 @@ fn command_dog(
     mut click_events: EventReader<MapClickEvent>,
 ) {
     click_events.read().for_each(|event| {
-        dogs.iter_mut().for_each(|(ent, mut move_to)| {
+        dogs.iter_mut().for_each(|(ent, move_to)| {
             if event.button() == MouseButton::Right {
                 if let Some(mut move_to) = move_to {
                     move_to.set(event.translation().truncate());
