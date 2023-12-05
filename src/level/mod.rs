@@ -7,11 +7,11 @@ pub mod loader;
 pub mod progress;
 pub mod transistion;
 
-pub const CAMPAIGN_LEVELS: [&str; 4] = [
+pub const CAMPAIGN_LEVELS: [&str; 1] = [
     "levels/1.level.ron",
-    "levels/2.level.ron",
-    "levels/3.level.ron",
-    "levels/4.level.ron",
+    // "levels/2.level.ron",
+    // "levels/3.level.ron",
+    // "levels/4.level.ron",
 ];
 
 pub struct LevelPlugin;

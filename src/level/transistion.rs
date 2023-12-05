@@ -43,8 +43,12 @@ fn level_select_button(
         .iter()
         .for_each(|(interaction, selection)| match *interaction {
             Interaction::Pressed => {
-                state.set(GameState::GameOver);
-                current_level.0 = selection.0;
+                if selection.0 >= CAMPAIGN_LEVELS.len() {
+                    state.set(GameState::Menu);
+                } else {
+                    state.set(GameState::GameOver);
+                    current_level.0 = selection.0;
+                }
             }
             _ => {}
         });
@@ -98,8 +102,19 @@ fn next_level(
     })
     .insert(AllowedState::new(GameState::Game))
     .with_children(|builder| {
-        spawn_progress_button("Next Level", current_level.next_level(), builder, &server);
-        spawn_progress_button("Retry", current_level.0, builder, &server);
+        if current_level.0 + 1 >= CAMPAIGN_LEVELS.len() {
+            spawn_progress_button(
+                "Back to Menu",
+                current_level.next_level() + 1,
+                builder,
+                &server,
+            );
+
+            return;
+        } else {
+            spawn_progress_button("Next Level", current_level.next_level(), builder, &server);
+            spawn_progress_button("Retry", current_level.0, builder, &server);
+        }
     });
 }
 
@@ -124,7 +139,7 @@ fn spawn_progress_button(
     .insert(LevelSelectorButton(level))
     .insert(NineSliceUiTexture::from_slice(
         server.load("sprites/ui.png"),
-        Rect::new(0., 0., 48., 48.),
+        Rect::new(48., 0., 96., 48.),
     ))
     .with_children(|cmd| {
         cmd.spawn(TextBundle {
@@ -132,7 +147,7 @@ fn spawn_progress_button(
                 text,
                 TextStyle {
                     font_size: 20.,
-                    color: Color::BLACK,
+                    color: Color::WHITE,
                     ..default()
                 },
             ),
