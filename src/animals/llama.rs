@@ -1,11 +1,8 @@
 use std::time::Duration;
 
-use bevy::{gltf::Gltf, prelude::*};
+use bevy::{gltf::Gltf, pbr::ExtendedMaterial, prelude::*};
 use bevy_rapier2d::{
-    dynamics::{ExternalImpulse},
-    geometry::Collider,
-    pipeline::QueryFilter,
-    plugin::RapierContext,
+    dynamics::ExternalImpulse, geometry::Collider, pipeline::QueryFilter, plugin::RapierContext,
 };
 use bevy_tweening::{
     lens::TransformPositionLens, Animator, EaseFunction, RepeatCount, RepeatStrategy, Tween,
@@ -21,11 +18,18 @@ const LLAMA_RANGE: f32 = 20.;
 const LLAMA_STOMP_COOLDOWN: f32 = 2.;
 const LLAMA_STOMP_FORCE: f32 = 1000.;
 
-use super::{animations::AnimalState, sheep::SheepTag};
+use super::{
+    animations::AnimalState,
+    sheep::SheepTag,
+    telegraph::{TelegraphBundle, TelegraphMaterial, TelegraphTag},
+};
 pub struct LlamaPlugin;
 impl Plugin for LlamaPlugin {
     fn build(&self, app: &mut App) {
-        app.add_systems(Update, llama_stomp);
+        app.add_systems(
+            Update,
+            (llama_stomp, add_telegraph_to_llama, update_progress),
+        );
     }
 }
 
@@ -67,6 +71,7 @@ impl Default for LLamaBundle {
 fn llama_stomp(
     mut cmd: Commands,
     mut query: Query<(Entity, &mut AnimalState, &Children), (With<LLamaTag>, Without<Cooldown>)>,
+    telegraphs: Query<With<TelegraphTag>>,
     level: Query<&Handle<LevelAsset>>,
     positions: Query<&Transform>,
     sheeps: Query<With<SheepTag>>,
@@ -130,12 +135,60 @@ fn llama_stomp(
             .with_repeat_strategy(RepeatStrategy::MirroredRepeat)
             .with_repeat_count(RepeatCount::Finite(2));
 
-            cmd.entity(*children.first().unwrap())
-                .insert(Animator::new(tween));
+            match children
+                .iter()
+                .filter(|e| telegraphs.get(**e).is_err())
+                .next()
+            {
+                Some(child) => {
+                    cmd.entity(*child).insert(Animator::new(tween));
+                }
+                None => (),
+            };
 
             cmd.entity(entity)
                 .insert(Cooldown::new(Duration::from_secs_f32(
-                    level.llama_stomp_rate,
+                    level.llama_stomp_rate + rand::random::<f32>() * 2.,
                 )));
         });
+}
+
+fn add_telegraph_to_llama(
+    query: Query<Entity, Added<LLamaTag>>,
+    mut cmd: Commands,
+    mut meshes: ResMut<Assets<Mesh>>,
+    mut materials: ResMut<Assets<TelegraphMaterial>>,
+) {
+    query.iter().for_each(|entity| {
+        let material = TelegraphMaterial {
+            progress: Vec4::new(0.5, 0., 0., 0.),
+            color: Color::RED,
+        };
+
+        cmd.entity(entity).with_children(|cmd| {
+            cmd.spawn(TelegraphBundle {
+                mesh: meshes.add(Mesh::from(shape::Quad::new(Vec2::splat(LLAMA_RANGE)))),
+                material: materials.add(material),
+                transform: Transform::from_xyz(0., 0., 0.1),
+                ..default()
+            });
+        });
+    });
+}
+
+fn update_progress(
+    telegraphs: Query<(&Handle<TelegraphMaterial>, &Parent)>,
+    cooldown_havers: Query<&Cooldown>,
+    mut materials: ResMut<Assets<TelegraphMaterial>>,
+) {
+    telegraphs.iter().for_each(|(material, parent)| {
+        let Ok(cooldown) = cooldown_havers.get(parent.get()) else {
+            return;
+        };
+        let Some(material) = materials.get_mut(material) else {
+            return;
+        };
+
+        material.progress.x = cooldown.progress();
+    });
 }

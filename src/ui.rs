@@ -102,7 +102,7 @@ fn spawn_ui(mut cmd: Commands, portrait: Res<PortraitRender>, asset_server: Res<
             .with_children(|cmd| {
                 // ----------------------------------------------------------------
                 // Sheep saved Panel
-                cmd.spawn(NineSliceUiMaterialBundle {
+                cmd.spawn(NodeBundle {
                     style: Style {
                         display: Display::Flex,
                         width: Val::Px(130.),
@@ -112,12 +112,12 @@ fn spawn_ui(mut cmd: Commands, portrait: Res<PortraitRender>, asset_server: Res<
                         margin: UiRect::all(Val::Px(5.)),
                         ..default()
                     },
-                    nine_slice_texture: NineSliceUiTexture::from_slice(
-                        asset_server.load("sprites/ui.png"),
-                        Rect::new(0., 0., 48., 48.),
-                    )
-                    .with_blend_color(Color::GREEN)
-                    .with_blend_mix(0.02),
+                    // nine_slice_texture: NineSliceUiTexture::from_slice(
+                    //     asset_server.load("sprites/ui.png"),
+                    //     Rect::new(0., 0., 48., 48.),
+                    // )
+                    // .with_blend_color(Color::GREEN)
+                    // .with_blend_mix(0.02),
                     ..default()
                 })
                 .with_children(|cmd| {
@@ -125,7 +125,7 @@ fn spawn_ui(mut cmd: Commands, portrait: Res<PortraitRender>, asset_server: Res<
                         text: Text::from_section(
                             "Saved 0",
                             TextStyle {
-                                font_size: 15.,
+                                font_size: 20.,
                                 color: Color::WHITE,
                                 ..default()
                             },
@@ -136,7 +136,7 @@ fn spawn_ui(mut cmd: Commands, portrait: Res<PortraitRender>, asset_server: Res<
                 });
                 // ----------------------------------------------------------------
                 // Sheep lost Panel
-                cmd.spawn(NineSliceUiMaterialBundle {
+                cmd.spawn(NodeBundle {
                     style: Style {
                         display: Display::Flex,
                         width: Val::Px(130.),
@@ -146,20 +146,21 @@ fn spawn_ui(mut cmd: Commands, portrait: Res<PortraitRender>, asset_server: Res<
                         margin: UiRect::all(Val::Px(5.)),
                         ..default()
                     },
-                    nine_slice_texture: NineSliceUiTexture::from_slice(
-                        asset_server.load("sprites/ui.png"),
-                        Rect::new(0., 0., 48., 48.),
-                    )
-                    .with_blend_color(Color::RED)
-                    .with_blend_mix(0.01),
                     ..default()
+                    // nine_slice_texture: NineSliceUiTexture::from_slice(
+                    //     asset_server.load("sprites/ui.png"),
+                    //     Rect::new(0., 0., 48., 48.),
+                    // )
+                    // .with_blend_color(Color::RED)
+                    // .with_blend_mix(0.01),
+                    // ..default()
                 })
                 .with_children(|cmd| {
                     cmd.spawn(TextBundle {
                         text: Text::from_section(
                             "Lost 0",
                             TextStyle {
-                                font_size: 15.,
+                                font_size: 20.,
                                 color: Color::WHITE,
                                 ..default()
                             },

@@ -1,4 +1,4 @@
-use bevy::core_pipeline::bloom::BloomSettings;
+use bevy::core_pipeline::bloom::{BloomCompositeMode, BloomPrefilterSettings, BloomSettings};
 use bevy::input::mouse::MouseWheel;
 use bevy::prelude::*;
 
@@ -36,7 +36,13 @@ fn spawn_camera(mut cmd: Commands) {
     })
     .insert(ZoomDistance(100.))
     .insert(BloomSettings {
-        intensity: 0.2,
+        intensity: 0.3,
+        composite_mode: BloomCompositeMode::Additive,
+        prefilter_settings: BloomPrefilterSettings {
+            threshold: 1.0,
+            threshold_softness: 0.1,
+            ..default()
+        },
         ..default()
     })
     .insert(MainCamera)

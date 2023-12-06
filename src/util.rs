@@ -34,6 +34,10 @@ impl Cooldown {
     pub fn new(duration: Duration) -> Self {
         Self(Timer::new(duration, TimerMode::Once))
     }
+
+    pub fn progress(&self) -> f32 {
+        self.0.percent()
+    }
 }
 
 fn lifetime_system(mut cmd: Commands, mut life_q: Query<(Entity, &mut LifeTime)>, time: Res<Time>) {

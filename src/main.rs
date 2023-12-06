@@ -18,6 +18,7 @@ mod controls;
 mod debug;
 mod goal;
 mod level;
+mod liquid;
 mod menu;
 mod state;
 mod trap;
@@ -28,10 +29,10 @@ fn main() {
     App::new()
         .insert_resource(AssetMetaCheck::Never)
         .add_plugins((
-            #[cfg(not(debug_assertions))]
-            EmbeddedAssetPlugin {
-                mode: bevy_embedded_assets::PluginMode::ReplaceDefault,
-            },
+            //            #[cfg(not(debug_assertions))]
+            //            EmbeddedAssetPlugin {
+            //                mode: bevy_embedded_assets::PluginMode::ReplaceDefault,
+            //            },
             #[cfg(debug_assertions)]
             debug::DebugPlugin,
             DefaultPlugins
@@ -63,7 +64,12 @@ fn main() {
             util::UtilPlugin,
             level::LevelPlugin,
         ))
-        .add_plugins((trap::TrapPlugin, goal::GoalPlugin, ui::UiPlugin))
+        .add_plugins((
+            liquid::LiquidMaterialsPlugin,
+            trap::TrapPlugin,
+            goal::GoalPlugin,
+            ui::UiPlugin,
+        ))
         .add_systems(Startup, load_models)
         .insert_resource(RapierConfiguration {
             gravity: Vec2::ZERO,
@@ -79,7 +85,7 @@ fn main() {
 fn load_models(mut game_assets: ResMut<GameAssets>, server: Res<AssetServer>) {
     let dog_handle: Handle<Gltf> = server.load("models/pug.glb");
     let sheep_handle: Handle<Gltf> = server.load("models/sheep.glb");
-    let llama_handle: Handle<Gltf> = server.load("models/sheep.glb");
+    let llama_handle: Handle<Gltf> = server.load("models/llama.glb");
 
     game_assets.add(sheep_handle.clone().untyped());
     game_assets.add(dog_handle.clone().untyped());

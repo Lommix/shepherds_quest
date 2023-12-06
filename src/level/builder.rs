@@ -1,12 +1,19 @@
+use std::{f32::consts::PI, time::Duration};
+
 use bevy::prelude::*;
 use bevy_rapier2d::{dynamics::RigidBody, geometry::Collider};
+use bevy_tweening::{
+    lens::{TransformPositionLens, TransformRotationLens},
+    Animator, EaseFunction, RepeatCount, RepeatStrategy, Tween,
+};
 
 use crate::{
     animals::{dog::DogBundle, llama::LLamaBundle, physics::MoveTo, sheep::SheepBundle},
-    goal::{Goal, GoalBundle},
+    goal::{GoalBundle, GoalTag},
     level::{LevelBundle, TILE_SIZE},
+    liquid::{LiquidData, LiquidMaterial},
     state::GameState,
-    trap::{Trap, TrapBundle},
+    trap::TrapBundle,
     ui::Dialog,
 };
 
@@ -59,6 +66,7 @@ fn load_level(
     levels: Res<Assets<LevelAsset>>,
     mut next_state: ResMut<NextState<GameState>>,
     mut materials: ResMut<Assets<StandardMaterial>>,
+    mut liquid_materials: ResMut<Assets<LiquidMaterial>>,
     mut meshes: ResMut<Assets<Mesh>>,
     mut dialog: Query<&mut Text, With<Dialog>>,
     server: Res<AssetServer>,
@@ -78,6 +86,9 @@ fn load_level(
             return;
         };
 
+        // -----------------------------------------------------------------------
+        // Preapare materials
+
         let gras_material = materials.add(StandardMaterial {
             base_color: Color::WHITE,
             base_color_texture: Some(server.load("sprites/grass.png")),
@@ -88,6 +99,14 @@ fn load_level(
             base_color: Color::WHITE,
             base_color_texture: Some(server.load("textures/cobble_1.png")),
             ..default()
+        });
+
+        let lava_material = liquid_materials.add(LiquidMaterial {
+            noise: server.load("textures/noise_m_7.png"),
+            uniforms: LiquidData {
+                color: Color::RED,
+                ..default()
+            },
         });
 
         let wall_mesh = meshes.add(
@@ -101,6 +120,14 @@ fn load_level(
                 .with_generated_tangents()
                 .unwrap(),
         );
+
+        let goal_material = materials.add(StandardMaterial {
+            base_color: Color::rgb(0.0, 2.0, 0.0),
+            ..default()
+        });
+
+        // -----------------------------------------------------------------------
+        // Build Layout
 
         cmd.entity(entity).with_children(|cmd| {
             data.iter().for_each(|(pos, tile)| match tile {
@@ -158,18 +185,24 @@ fn load_level(
                 Tiles::Trap => {
                     cmd.spawn(TrapBundle {
                         transform: Transform::from_translation(pos.extend(0.)),
-                        trap: Trap::new(Vec2::splat(TILE_SIZE)),
+                        mesh: flat_mesh.clone(),
+                        material: lava_material.clone(),
+                        collider: Collider::cuboid(TILE_SIZE / 2., TILE_SIZE / 2.),
                         ..Default::default()
                     });
                 }
                 Tiles::Goal => {
                     cmd.spawn(GoalBundle {
                         transform: Transform::from_translation(pos.extend(0.)),
-                        goal: Goal::new(Vec2::splat(TILE_SIZE)),
+                        mesh: flat_mesh.clone(),
+                        material: goal_material.clone(),
+                        collider: Collider::cuboid(TILE_SIZE / 2., TILE_SIZE / 2.),
                         ..Default::default()
                     });
                 }
             });
+
+            // spawn sun
             cmd.spawn(PointLightBundle {
                 transform: Transform::from_translation((level.size.unwrap() / 2.).extend(225.)),
                 point_light: PointLight {
@@ -177,14 +210,43 @@ fn load_level(
                     intensity: 1990000.,
                     radius: 0.,
                     range: 500.,
-                    #[cfg(not(target_arch = "wasm32"))]
+                    // #[cfg(not(target_arch = "wasm32"))]
                     shadows_enabled: true,
                     ..Default::default()
                 },
                 ..default()
             });
 
-            info!("enter game");
+            // spawn ufo
+            let acc_goal_pos = data
+                .iter()
+                .filter(|(_, tile)| matches!(tile, Tiles::Goal))
+                .map(|(pos, _)| *pos)
+                .collect::<Vec<_>>();
+
+            let avarage_goal = acc_goal_pos.iter().fold(Vec2::ZERO, |acc, pos| acc + *pos)
+                / acc_goal_pos.len() as f32;
+
+            let pos_tween = Tween::new(
+                EaseFunction::SineInOut,
+                Duration::from_millis(800),
+                TransformPositionLens {
+                    start: avarage_goal.extend(25.),
+                    end: avarage_goal.extend(30.),
+                },
+            )
+            .with_repeat_strategy(RepeatStrategy::MirroredRepeat)
+            .with_repeat_count(RepeatCount::Infinite);
+
+            cmd.spawn(SceneBundle {
+                scene: server.load("models/ufo.glb#Scene0"),
+                transform: Transform::from_translation(avarage_goal.extend(25.))
+                    .with_scale(Vec3::splat((acc_goal_pos.len() as f32).clamp(1., 3.))),
+                ..default()
+            })
+            .insert(Animator::new(pos_tween));
+
+            // next state
             next_state.set(GameState::Game);
         });
 

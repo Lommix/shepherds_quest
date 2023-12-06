@@ -20,7 +20,7 @@ pub const GLOW_MESH: Handle<Mesh> = Handle::weak_from_u128(126565623323232325651
 pub struct GoalPlugin;
 impl Plugin for GoalPlugin {
     fn build(&self, app: &mut App) {
-        app.add_systems(Update, (spawn_goal, watch_goal_enter));
+        app.add_systems(Update, watch_goal_enter);
 
         let mut materials = app
             .world
@@ -47,67 +47,46 @@ impl Plugin for GoalPlugin {
 }
 
 #[derive(Component)]
-pub struct Goal {
-    size: Vec2,
-}
-impl Goal {
-    pub fn new(size: Vec2) -> Self {
-        Self { size }
-    }
-}
+pub struct GoalTag;
 
 #[derive(Bundle)]
 pub struct GoalBundle {
+    pub mesh: Handle<Mesh>,
+    pub material: Handle<StandardMaterial>,
     pub visibility: Visibility,
     pub inherited_visibility: InheritedVisibility,
     pub view_visibility: ViewVisibility,
     pub transform: Transform,
     pub global_transform: GlobalTransform,
-    pub goal: Goal,
+    pub goal: GoalTag,
     pub name: Name,
+    pub sensor: Sensor,
+    pub collider: Collider,
 }
 
 impl Default for GoalBundle {
     fn default() -> Self {
         Self {
+            mesh: Handle::default(),
+            material: Handle::default(),
             visibility: Visibility::default(),
             inherited_visibility: InheritedVisibility::default(),
             view_visibility: ViewVisibility::default(),
             transform: Transform::default(),
             global_transform: GlobalTransform::default(),
             name: Name::new("goal"),
-            goal: Goal {
-                size: Vec2::new(50.0, 50.0),
-            },
+            goal: GoalTag,
+            sensor: Sensor::default(),
+            collider: Collider::default(),
         }
     }
-}
-
-fn spawn_goal(
-    query: Query<(Entity, &Goal), Without<Handle<Mesh>>>,
-    mut cmd: Commands,
-    mut meshes: ResMut<Assets<Mesh>>,
-    mut materials: ResMut<Assets<StandardMaterial>>,
-) {
-    query.iter().for_each(|(entity, goal)| {
-        let mesh = meshes.add(Mesh::from(shape::Quad::new(goal.size)));
-        let mut material: StandardMaterial = (Color::BLUE.with_a(0.3)).into();
-        material.unlit = true;
-        material.alpha_mode = AlphaMode::Blend;
-
-        cmd.entity(entity)
-            .insert(mesh)
-            .insert(Sensor)
-            .insert(Collider::cuboid(goal.size.x / 2., goal.size.y / 2.))
-            .insert(materials.add(material));
-    });
 }
 
 fn watch_goal_enter(
     mut cmd: Commands,
     mut score: ResMut<Score>,
     _meshes: ResMut<Assets<Mesh>>,
-    goals: Query<Entity, With<Goal>>,
+    goals: Query<Entity, With<GoalTag>>,
     sheeps: Query<Entity, With<SheepTag>>,
     rapier_context: Res<RapierContext>,
 ) {

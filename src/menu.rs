@@ -101,7 +101,7 @@ fn spawn_menue(mut cmd: Commands, server: Res<AssetServer>, mut images: ResMut<A
         cmd.spawn(NodeBundle {
             style: Style {
                 display: Display::Flex,
-                width: Val::Px(500.),
+                width: Val::Px(600.),
                 height: Val::Percent(100.),
                 justify_content: JustifyContent::Center,
                 align_items: AlignItems::Center,
@@ -117,7 +117,7 @@ fn spawn_menue(mut cmd: Commands, server: Res<AssetServer>, mut images: ResMut<A
                     });
             cmd.spawn(TextBundle {
                 text: Text::from_section(
-                    "Shepherd's Quest",
+                    "A strange Shepherd's Quest",
                     TextStyle {
                         font_size: 40.,
                         color: Color::WHITE,
@@ -127,7 +127,7 @@ fn spawn_menue(mut cmd: Commands, server: Res<AssetServer>, mut images: ResMut<A
                 style: Style {
                     display: Display::Flex,
                     width: Val::Auto,
-                    height: Val::Px(50.),
+                    height: Val::Auto,
                     margin: UiRect::vertical(Val::Px(20.)),
                     align_self: AlignSelf::Center,
                     ..default()
@@ -137,7 +137,7 @@ fn spawn_menue(mut cmd: Commands, server: Res<AssetServer>, mut images: ResMut<A
 
             cmd.spawn(TextBundle {
                 text: Text::from_section(
-                    "Help Henk the pug to fullfill his life long dream of becoming a Shepherd's dog!",
+                    "Help Henk the pug to fulfill his lifelong dream of becoming a shepherd's dog. For the first time, he met a strange Shepherd, that is willing to give him a chance. ",
                     TextStyle {
                         font_size: 16.,
                         color: Color::WHITE,
@@ -146,9 +146,9 @@ fn spawn_menue(mut cmd: Commands, server: Res<AssetServer>, mut images: ResMut<A
                 ),
                 style: Style {
                     display: Display::Flex,
-                    width: Val::Px(300.),
+                    width: Val::Auto,
                     height: Val::Px(50.),
-                    margin: UiRect::vertical(Val::Px(20.)),
+                    margin: UiRect::bottom(Val::Px(80.)),
                     padding : UiRect::all(Val::Px(10.)),
                     align_self: AlignSelf::Center,
                     ..default()
@@ -161,7 +161,7 @@ fn spawn_menue(mut cmd: Commands, server: Res<AssetServer>, mut images: ResMut<A
                     display: Display::Flex,
                     width: Val::Px(200.),
                     height: Val::Px(50.),
-                    margin: UiRect::vertical(Val::Px(5.)),
+                    margin: UiRect::bottom(Val::Px(10.)),
                     justify_content: JustifyContent::Center,
                     align_items: AlignItems::Center,
                     ..default()
@@ -176,7 +176,7 @@ fn spawn_menue(mut cmd: Commands, server: Res<AssetServer>, mut images: ResMut<A
             .with_children(|cmd| {
                 cmd.spawn(TextBundle {
                     text: Text::from_section(
-                        "Level 1",
+                        "Campaign",
                         TextStyle {
                             font_size: 20.,
                             color: Color::WHITE,
@@ -192,7 +192,7 @@ fn spawn_menue(mut cmd: Commands, server: Res<AssetServer>, mut images: ResMut<A
                     display: Display::Flex,
                     width: Val::Px(200.),
                     height: Val::Px(50.),
-                    margin: UiRect::vertical(Val::Px(5.)),
+                    margin: UiRect::vertical(Val::Px(10.)),
                     justify_content: JustifyContent::Center,
                     align_items: AlignItems::Center,
                     ..default()
