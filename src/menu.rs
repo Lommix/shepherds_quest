@@ -117,7 +117,7 @@ fn spawn_menue(mut cmd: Commands, server: Res<AssetServer>, mut images: ResMut<A
                     });
             cmd.spawn(TextBundle {
                 text: Text::from_section(
-                    "A strange Shepherd's Quest",
+                            "A strange Shepherd's Quest",
                     TextStyle {
                         font_size: 40.,
                         color: Color::WHITE,
@@ -137,7 +137,7 @@ fn spawn_menue(mut cmd: Commands, server: Res<AssetServer>, mut images: ResMut<A
 
             cmd.spawn(TextBundle {
                 text: Text::from_section(
-                    "Help Henk the pug to fulfill his lifelong dream of becoming a shepherd's dog. For the first time, he met a strange Shepherd, that is willing to give him a chance. ",
+                    "Help Henk the pug to fulfill his lifelong dream of becoming a shepherd's dog. For the first time, he met a strange Shepherd, that is willing to give him a chance.",
                     TextStyle {
                         font_size: 16.,
                         color: Color::WHITE,
@@ -146,7 +146,7 @@ fn spawn_menue(mut cmd: Commands, server: Res<AssetServer>, mut images: ResMut<A
                 ),
                 style: Style {
                     display: Display::Flex,
-                    width: Val::Auto,
+                    width: Val::Px(400.),
                     height: Val::Px(50.),
                     margin: UiRect::bottom(Val::Px(80.)),
                     padding : UiRect::all(Val::Px(10.)),

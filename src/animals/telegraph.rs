@@ -1,4 +1,4 @@
-use bevy::{prelude::*, render::render_resource::AsBindGroup, pbr::NotShadowCaster};
+use bevy::{pbr::NotShadowCaster, prelude::*, render::render_resource::AsBindGroup};
 pub struct TelegraphPlugin;
 impl Plugin for TelegraphPlugin {
     fn build(&self, app: &mut App) {

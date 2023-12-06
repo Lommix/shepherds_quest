@@ -5,12 +5,12 @@ use bevy::{
 pub struct LiquidMaterialsPlugin;
 impl Plugin for LiquidMaterialsPlugin {
     fn build(&self, app: &mut App) {
-        app.add_plugins(MaterialPlugin::<LiquidMaterial>::default());
+        app.add_plugins(MaterialPlugin::<PulsMaterial>::default());
         app.add_systems(Update, update_liquid);
     }
 }
 
-fn update_liquid(time: Res<Time>, mut materials: ResMut<Assets<LiquidMaterial>>) {
+fn update_liquid(time: Res<Time>, mut materials: ResMut<Assets<PulsMaterial>>) {
     materials.iter_mut().for_each(|(_, material)| {
         material.uniforms.time += time.delta_seconds();
     });
@@ -20,10 +20,12 @@ fn update_liquid(time: Res<Time>, mut materials: ResMut<Assets<LiquidMaterial>>)
 pub struct LiquidData {
     pub time: f32,
     pub color: Color,
+    pub energy_threshold: f32,
+    pub intensity: f32,
 }
 
 #[derive(Asset, TypePath, Default, Clone, AsBindGroup)]
-pub struct LiquidMaterial {
+pub struct PulsMaterial {
     #[texture(0)]
     #[sampler(1)]
     pub noise: Handle<Image>,
@@ -31,9 +33,9 @@ pub struct LiquidMaterial {
     pub uniforms: LiquidData,
 }
 
-impl Material for LiquidMaterial {
+impl Material for PulsMaterial {
     fn fragment_shader() -> bevy::render::render_resource::ShaderRef {
-        "shaders/liquid.wgsl".into()
+        "shaders/puls.wgsl".into()
     }
 
     fn alpha_mode(&self) -> AlphaMode {

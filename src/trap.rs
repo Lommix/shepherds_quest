@@ -10,7 +10,7 @@ use bevy_rapier2d::{
 use crate::{
     animals::{animations::AnimalState, sheep::SheepTag},
     level::Score,
-    liquid::LiquidMaterial,
+    puls_material::PulsMaterial,
     util::LifeTime,
 };
 
@@ -28,7 +28,7 @@ pub struct TrapTag;
 #[derive(Bundle)]
 pub struct TrapBundle {
     pub mesh: Handle<Mesh>,
-    pub material: Handle<LiquidMaterial>,
+    pub material: Handle<PulsMaterial>,
     pub visibility: Visibility,
     pub inherited_visibility: InheritedVisibility,
     pub view_visibility: ViewVisibility,

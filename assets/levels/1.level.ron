@@ -1,6 +1,6 @@
 (
     name: "Pug in training",
-    intro: "Sheperd Bob: Go Henk, get the sheep to the extraction point .. Ehm I mean the stables!",
+    intro: "Sheperd Bob: Go Henk, get the sheep to the extraction point .. Ehm I mean the stables! Also be careful, it's vulcano season!",
     win: "Good boy! You did it! Have some treats! Let's take \"care\" of the next farm ...",
     loose: "Bad boy! No treats for you! Let's try again ...",
     llama_stomp_rate: 5,

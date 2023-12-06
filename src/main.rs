@@ -18,7 +18,7 @@ mod controls;
 mod debug;
 mod goal;
 mod level;
-mod liquid;
+mod puls_material;
 mod menu;
 mod state;
 mod trap;
@@ -65,7 +65,7 @@ fn main() {
             level::LevelPlugin,
         ))
         .add_plugins((
-            liquid::LiquidMaterialsPlugin,
+            puls_material::LiquidMaterialsPlugin,
             trap::TrapPlugin,
             goal::GoalPlugin,
             ui::UiPlugin,

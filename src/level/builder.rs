@@ -1,17 +1,16 @@
-use std::{f32::consts::PI, time::Duration};
+use std::time::Duration;
 
 use bevy::prelude::*;
 use bevy_rapier2d::{dynamics::RigidBody, geometry::Collider};
 use bevy_tweening::{
-    lens::{TransformPositionLens, TransformRotationLens},
-    Animator, EaseFunction, RepeatCount, RepeatStrategy, Tween,
+    lens::TransformPositionLens, Animator, EaseFunction, RepeatCount, RepeatStrategy, Tween,
 };
 
 use crate::{
     animals::{dog::DogBundle, llama::LLamaBundle, physics::MoveTo, sheep::SheepBundle},
-    goal::{GoalBundle, GoalTag},
+    goal::GoalBundle,
     level::{LevelBundle, TILE_SIZE},
-    liquid::{LiquidData, LiquidMaterial},
+    puls_material::{LiquidData, PulsMaterial},
     state::GameState,
     trap::TrapBundle,
     ui::Dialog,
@@ -66,7 +65,7 @@ fn load_level(
     levels: Res<Assets<LevelAsset>>,
     mut next_state: ResMut<NextState<GameState>>,
     mut materials: ResMut<Assets<StandardMaterial>>,
-    mut liquid_materials: ResMut<Assets<LiquidMaterial>>,
+    mut liquid_materials: ResMut<Assets<PulsMaterial>>,
     mut meshes: ResMut<Assets<Mesh>>,
     mut dialog: Query<&mut Text, With<Dialog>>,
     server: Res<AssetServer>,
@@ -101,10 +100,12 @@ fn load_level(
             ..default()
         });
 
-        let lava_material = liquid_materials.add(LiquidMaterial {
-            noise: server.load("textures/noise_m_7.png"),
+        let lava_material = liquid_materials.add(PulsMaterial {
+            noise: server.load("sprites/lava.png"),
             uniforms: LiquidData {
                 color: Color::RED,
+                energy_threshold: 0.3,
+                intensity: 50.,
                 ..default()
             },
         });

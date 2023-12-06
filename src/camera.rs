@@ -57,7 +57,7 @@ fn spawn_camera(mut cmd: Commands) {
 fn zoom(mut query: Query<&mut ZoomDistance>, mut wheel_events: EventReader<MouseWheel>) {
     wheel_events.read().for_each(|ev| {
         query.iter_mut().for_each(|mut zoom| {
-            zoom.0 = (zoom.0 + ev.y.clamp(-1., 1.) * 10.).clamp(20., 1000.);
+            zoom.0 = (zoom.0 + ev.y.clamp(-1., 1.) * 10.).clamp(20., 200.);
         })
     })
 }
