@@ -45,7 +45,7 @@ fn main() {
                 .set(WindowPlugin {
                     primary_window: Some(Window {
                         title: "Bevy App".to_string(),
-                        resolution: WindowResolution::new(1200., 900.),
+                        resolution: WindowResolution::new(1400., 900.),
                         ..default()
                     }),
                     ..default()

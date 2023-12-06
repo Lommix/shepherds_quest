@@ -86,7 +86,7 @@ fn load_level(
 
         let wall_material = materials.add(StandardMaterial {
             base_color: Color::WHITE,
-            base_color_texture: Some(server.load("textures/cartoon_wall.png")),
+            base_color_texture: Some(server.load("textures/cobble_1.png")),
             ..default()
         });
 

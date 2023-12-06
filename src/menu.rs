@@ -1,7 +1,19 @@
 #![allow(unused)]
 
 use crate::state::{AllowedState, GameState};
-use bevy::prelude::*;
+use bevy::{
+    core_pipeline::clear_color::ClearColorConfig,
+    prelude::*,
+    render::{
+        camera::RenderTarget,
+        render_resource::{
+            Extent3d, TextureDescriptor, TextureDimension, TextureFormat, TextureUsages,
+        },
+        texture::ImageSampler,
+        view::RenderLayers,
+    },
+};
+use bevy_aseprite::AsepriteBundle;
 use bevy_nine_slice_ui::NineSliceUiTexture;
 
 pub struct MenuPlugin;
@@ -29,7 +41,50 @@ fn hover_effect(_cmd: Commands, mut query: Query<(Entity, &Interaction, &mut Nin
         })
 }
 
-fn spawn_menue(mut cmd: Commands, server: Res<AssetServer>) {
+fn spawn_menue(mut cmd: Commands, server: Res<AssetServer>, mut images: ResMut<Assets<Image>>) {
+    let size = Extent3d {
+        width: 200,
+        height: 200,
+        ..default()
+    };
+
+    let texture_usages = TextureUsages::TEXTURE_BINDING | TextureUsages::COPY_DST;
+    let mut image = Image {
+        texture_descriptor: TextureDescriptor {
+            label: None,
+            size,
+            dimension: TextureDimension::D2,
+            format: TextureFormat::Rgba16Float,
+            mip_level_count: 1,
+            sample_count: 1,
+            usage: texture_usages | TextureUsages::RENDER_ATTACHMENT,
+            view_formats: &[TextureFormat::Rgba16Float],
+        },
+        sampler: ImageSampler::nearest(),
+        ..default()
+    };
+    image.resize(size);
+    let image_handle = images.add(image);
+
+    cmd.spawn(Camera2dBundle {
+        camera: Camera {
+            target: RenderTarget::Image(image_handle.clone()),
+            order: 2,
+            ..default()
+        },
+        camera_2d: Camera2d {
+            clear_color: ClearColorConfig::Custom(Color::BLUE.with_a(0.)),
+        },
+        ..default()
+    })
+    .insert(RenderLayers::layer(5));
+
+    cmd.spawn(AsepriteBundle {
+        aseprite: server.load("sprites/henk.aseprite"),
+        ..default()
+    })
+    .insert(RenderLayers::layer(5));
+
     cmd.spawn(NodeBundle {
         style: Style {
             display: Display::Flex,
@@ -53,13 +108,13 @@ fn spawn_menue(mut cmd: Commands, server: Res<AssetServer>) {
                 flex_direction: FlexDirection::Column,
                 ..default()
             },
-            // nine_slice_texture: NineSliceTexture::from_slice(
-            //     server.load("sprites/ui.png"),
-            //     Rect::new(0., 0., 48., 48.),
-            // ),
             ..default()
         })
         .with_children(|cmd| {
+            cmd.spawn(ImageBundle{
+                        image: UiImage::new(image_handle),
+                        ..default()
+                    });
             cmd.spawn(TextBundle {
                 text: Text::from_section(
                     "Shepherd's Quest",
@@ -82,7 +137,7 @@ fn spawn_menue(mut cmd: Commands, server: Res<AssetServer>) {
 
             cmd.spawn(TextBundle {
                 text: Text::from_section(
-                    "Help Hank the pug to fullfill his life long dream of becoming a Shepherd's dog!",
+                    "Help Henk the pug to fullfill his life long dream of becoming a Shepherd's dog!",
                     TextStyle {
                         font_size: 16.,
                         color: Color::WHITE,
