@@ -3,11 +3,12 @@ use bevy::{gltf::Gltf, prelude::*};
 use bevy_rapier2d::prelude::*;
 
 use crate::{
+    level::loader::LevelAsset,
     state::{AllowedState, GameState},
     util::Cooldown,
 };
 
-use super::{animations::AnimalState, dog::DogTag, physics::MoveTo, AnimalBehavior};
+use super::{animations::AnimalState, dog::DogTag, physics::MoveTo };
 
 pub struct SheepBehaviorPlugin;
 impl Plugin for SheepBehaviorPlugin {
@@ -68,11 +69,23 @@ fn sheep_flocking(
     move_to: Query<&MoveTo>,
     positions: Query<&Transform>,
     rapier_context: Res<RapierContext>,
-    sheep_behavior: Res<AnimalBehavior>,
+    levels: Res<Assets<LevelAsset>>,
+    level: Query<&Handle<LevelAsset>>,
 ) {
+    let Ok(handle) = level.get_single() else {
+        debug!("wtf you doing");
+        return;
+    };
+
+    let Some(level) = levels.get(handle) else {
+        return;
+    };
+
+    let animal_behavior = level.animal_behavior.as_ref().unwrap_or_default();
+
     sheeps.iter().for_each(|entity| {
         let transform = positions.get(entity).unwrap();
-        let collider = Collider::ball(sheep_behavior.vision);
+        let collider = Collider::ball(animal_behavior.vision);
         let mut sheeps_in_range = Vec::new();
 
         rapier_context.intersections_with_shape(
@@ -97,14 +110,14 @@ fn sheep_flocking(
 
             let cohesion =
                 (average_position - transform.translation.truncate()).normalize_or_zero();
-            acc_direction += cohesion * sheep_behavior.cohesion;
+            acc_direction += cohesion * animal_behavior.cohesion;
 
             let alignment = sheeps_in_range
                 .iter()
                 .map(|ent| velocities.get(*ent).unwrap().linvel.normalize_or_zero())
                 .sum::<Vec2>()
                 / sheeps_in_range.len() as f32;
-            acc_direction += alignment * sheep_behavior.alignment;
+            acc_direction += alignment * animal_behavior.alignment;
 
             let separation = (sheeps_in_range
                 .iter()
@@ -117,7 +130,7 @@ fn sheep_flocking(
                 .sum::<Vec2>()
                 / sheeps_in_range.len() as f32)
                 .normalize_or_zero();
-            acc_direction += separation * sheep_behavior.separation;
+            acc_direction += separation * animal_behavior.separation;
         }
 
         let flee = dogs
@@ -126,7 +139,7 @@ fn sheep_flocking(
                 let position = positions.get(ent).unwrap().translation.truncate();
                 let distance = position.distance(transform.translation.truncate());
 
-                if distance > sheep_behavior.vision * 8. {
+                if distance > animal_behavior.vision * 8. {
                     return None;
                 }
 
@@ -136,7 +149,7 @@ fn sheep_flocking(
             .sum::<Vec2>()
             / dogs.iter().len() as f32;
 
-        acc_direction += flee.normalize_or_zero() * sheep_behavior.fear;
+        acc_direction += flee.normalize_or_zero() * animal_behavior.fear;
 
         let mut velocity = velocities.get_mut(entity).unwrap();
         acc_direction += velocity.linvel.normalize_or_zero();
@@ -144,10 +157,10 @@ fn sheep_flocking(
         if let Ok(move_to) = move_to.get(entity) {
             let direction =
                 (move_to.postion() - transform.translation.truncate()).normalize_or_zero();
-            acc_direction += direction * sheep_behavior.motivation;
+            acc_direction += direction * animal_behavior.motivation;
         }
 
         velocity.linvel = acc_direction.normalize_or_zero()
-            * (velocity.linvel.length() + flee.length()).min(sheep_behavior.sheep_speed);
+            * (velocity.linvel.length() + flee.length()).min(animal_behavior.sheep_speed);
     });
 }

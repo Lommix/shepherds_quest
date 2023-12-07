@@ -10,15 +10,14 @@ use bevy_rapier2d::prelude::*;
 use bevy_embedded_assets::EmbeddedAssetPlugin;
 
 use bevy_nine_slice_ui::NineSliceUiPlugin;
+use level::{loader::LevelAsset, Current, Levels};
 use state::GameAssets;
 
 mod animals;
 mod camera;
 mod controls;
-mod debug;
 mod goal;
 mod level;
-mod puls_material;
 mod menu;
 mod state;
 mod trap;
@@ -29,12 +28,10 @@ fn main() {
     App::new()
         .insert_resource(AssetMetaCheck::Never)
         .add_plugins((
-            //            #[cfg(not(debug_assertions))]
-            //            EmbeddedAssetPlugin {
-            //                mode: bevy_embedded_assets::PluginMode::ReplaceDefault,
-            //            },
-            #[cfg(debug_assertions)]
-            debug::DebugPlugin,
+            #[cfg(not(debug_assertions))]
+            EmbeddedAssetPlugin {
+                mode: bevy_embedded_assets::PluginMode::ReplaceDefault,
+            },
             DefaultPlugins
                 .set(ImagePlugin {
                     default_sampler: ImageSamplerDescriptor::nearest(),
@@ -64,12 +61,7 @@ fn main() {
             util::UtilPlugin,
             level::LevelPlugin,
         ))
-        .add_plugins((
-            puls_material::LiquidMaterialsPlugin,
-            trap::TrapPlugin,
-            goal::GoalPlugin,
-            ui::UiPlugin,
-        ))
+        .add_plugins((trap::TrapPlugin, goal::GoalPlugin, ui::UiPlugin))
         .add_systems(Startup, load_models)
         .insert_resource(RapierConfiguration {
             gravity: Vec2::ZERO,
@@ -82,7 +74,7 @@ fn main() {
         .run();
 }
 
-fn load_models(mut game_assets: ResMut<GameAssets>, server: Res<AssetServer>) {
+fn load_models(mut cmd: Commands, mut game_assets: ResMut<GameAssets>, server: Res<AssetServer>) {
     let dog_handle: Handle<Gltf> = server.load("models/pug.glb");
     let sheep_handle: Handle<Gltf> = server.load("models/sheep.glb");
     let llama_handle: Handle<Gltf> = server.load("models/llama.glb");
@@ -90,4 +82,11 @@ fn load_models(mut game_assets: ResMut<GameAssets>, server: Res<AssetServer>) {
     game_assets.add(sheep_handle.clone().untyped());
     game_assets.add(dog_handle.clone().untyped());
     game_assets.add(llama_handle.clone().untyped());
+
+    cmd.insert_resource(Levels::new(vec![
+        server.load("levels/1.level.ron"),
+        server.load("levels/2.level.ron"),
+        server.load("levels/3.level.ron"),
+        server.load("levels/4.level.ron"),
+    ]));
 }

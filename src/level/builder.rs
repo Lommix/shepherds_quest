@@ -10,7 +10,6 @@ use crate::{
     animals::{dog::DogBundle, llama::LLamaBundle, physics::MoveTo, sheep::SheepBundle},
     goal::GoalBundle,
     level::{LevelBundle, TILE_SIZE},
-    puls_material::{LiquidData, PulsMaterial},
     state::GameState,
     trap::TrapBundle,
     ui::Dialog,
@@ -65,7 +64,6 @@ fn load_level(
     levels: Res<Assets<LevelAsset>>,
     mut next_state: ResMut<NextState<GameState>>,
     mut materials: ResMut<Assets<StandardMaterial>>,
-    mut liquid_materials: ResMut<Assets<PulsMaterial>>,
     mut meshes: ResMut<Assets<Mesh>>,
     mut dialog: Query<&mut Text, With<Dialog>>,
     server: Res<AssetServer>,
@@ -97,17 +95,24 @@ fn load_level(
         let wall_material = materials.add(StandardMaterial {
             base_color: Color::WHITE,
             base_color_texture: Some(server.load("textures/cobble_1.png")),
+            normal_map_texture: Some(server.load("textures/cobble_n.png")),
             ..default()
         });
 
-        let lava_material = liquid_materials.add(PulsMaterial {
-            noise: server.load("sprites/lava.png"),
-            uniforms: LiquidData {
-                color: Color::RED,
-                energy_threshold: 0.3,
-                intensity: 50.,
-                ..default()
-            },
+        // let lava_material = liquid_materials.add(PulsMaterial {
+        //     noise: server.load("sprites/lava.png"),
+        //     uniforms: LiquidData {
+        //         color: Color::RED,
+        //         threshold: Color::RED * 0.3,
+        //         intensity: 50.,
+        //         ..default()
+        //     },
+        // });
+
+        let lava_material = materials.add(StandardMaterial {
+            base_color_texture: Some(server.load("sprites/lava.png")),
+            normal_map_texture: Some(server.load("sprites/lava_n.png")),
+            ..default()
         });
 
         let wall_mesh = meshes.add(

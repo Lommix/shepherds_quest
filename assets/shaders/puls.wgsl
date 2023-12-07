@@ -7,7 +7,7 @@
 struct ShaderData {
 	time: f32,
 	color: vec4<f32>,
-	threshold : f32,
+	threshold : vec4<f32>,
 	intensity : f32,
 }
 
@@ -17,15 +17,12 @@ fn fragment(
 ) -> @location(0) vec4<f32> {
 
 	var out = textureSample(image, image_sampler, mesh.uv);
-	let energy = (out.r + out.b + out.g) / 3.0;
 
-	let threshold = step(data.threshold, energy);
-	out.r += data.intensity * threshold * abs(sin(data.time));
+	let threshold = step(1. - data.threshold.rbg, out.rgb);
 
-	//let border = 0.01;
-	//let border_color = data.color * vec4<f32>(vec3<f32>(5.),1.);
-	//let border_mix = step(1.- border, mesh.uv.x) + step(mesh.uv.x, border) + step(1.- border, mesh.uv.y) + step(mesh.uv.y, border);
-	//out = mix(out, border_color, border_mix);
+	out.r += data.intensity * threshold.r * abs(sin(data.time));
+	out.g += data.intensity * threshold.g * abs(sin(data.time));
+	out.b += data.intensity * threshold.b * abs(sin(data.time));
 
     return out;
 }

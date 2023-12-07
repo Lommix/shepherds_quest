@@ -26,21 +26,113 @@ impl Plugin for LevelPlugin {
             progress::LevelProgressPlugin,
         ));
         app.init_resource::<Score>();
-        app.init_resource::<CurrentLevel>();
+    }
+}
+
+pub enum Current {
+    Campaign(usize),
+    Custom(Handle<LevelAsset>),
+}
+
+impl Default for Current {
+    fn default() -> Self {
+        Self::Campaign(0)
+    }
+}
+
+#[derive(Resource, Default)]
+pub struct Levels {
+    levels: Vec<Handle<LevelAsset>>,
+    current: Current,
+}
+
+impl Levels {
+    pub fn new(levels: Vec<Handle<LevelAsset>>) -> Self {
+        Self {
+            levels,
+            current: Current::default(),
+        }
+    }
+
+    pub fn current(&self) -> Handle<LevelAsset> {
+        match self.current {
+            Current::Campaign(id) => self.levels[id].clone(),
+            Current::Custom(ref handle) => handle.clone(),
+        }
+    }
+
+    pub fn is_last_or_custom(&self) -> bool{
+        match self.current {
+            Current::Campaign(id) => id >= self.levels.len() - 1,
+            Current::Custom(_) => true,
+        }
+    }
+
+    pub fn next(&self) -> Option<Handle<LevelAsset>> {
+        match self.current {
+            Current::Campaign(id) => {
+                if id < self.levels.len() - 1 {
+                    Some(self.levels[id + 1].clone())
+                } else {
+                    None
+                }
+            }
+            Current::Custom(_) => None,
+        }
+    }
+
+    pub fn set(&mut self, handle: Handle<LevelAsset>) {
+        match self.levels.iter().enumerate().find(|(_, h)| h == &&handle) {
+            Some((i, _)) => {
+                self.current = Current::Campaign(i);
+            }
+            None => {
+                self.current = Current::Custom(handle);
+            }
+        }
     }
 }
 
 #[derive(Component)]
 pub struct LevelLoaded;
 
-#[derive(Resource, Default)]
-pub struct CurrentLevel(pub usize);
-impl CurrentLevel {
-    pub fn next_level(&mut self) -> usize {
-        self.0 += 1;
-        self.0
-    }
-}
+// #[derive(Resource, Default)]
+// pub struct CurrentLevel {
+//     campaign_level: Option<usize>,
+//     pub handle: Handle<LevelAsset>,
+// }
+//
+// impl CurrentLevel {
+//     pub fn is_custom(&self) -> bool {
+//         self.campaign_level.is_none()
+//     }
+//
+//     pub fn current(&self) -> Handle<LevelAsset> {
+//         self.handle.clone()
+//     }
+//
+//     pub fn set(&mut self, handle: Handle<LevelAsset>) {
+//         self.handle = handle;
+//     }
+//
+//     pub fn last_campaign_level(&self) -> bool {
+//         self.campaign_level.is_some() && self.campaign_level.unwrap() >= CAMPAIGN_LEVELS.len() - 1
+//     }
+//
+//     pub fn next_campaign_level(&mut self) -> Option<usize> {
+//         match self.campaign_level {
+//             Some(id) => {
+//                 if id < CAMPAIGN_LEVELS.len() - 1 {
+//                     self.campaign_level = Some(id + 1);
+//                     Some(id + 1)
+//                 } else {
+//                     None
+//                 }
+//             }
+//             None => None,
+//         }
+//     }
+// }
 
 #[derive(Bundle)]
 pub struct LevelBundle {

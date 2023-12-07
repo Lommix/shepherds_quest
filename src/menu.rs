@@ -1,7 +1,15 @@
 #![allow(unused)]
 
-use crate::state::{AllowedState, GameState};
+use crate::{
+    level::{
+        builder::LoadLevelEvent,
+        loader::{LevelAsset, LevelAssetLoader},
+        CAMPAIGN_LEVELS,
+    },
+    state::{AllowedState, GameState},
+};
 use bevy::{
+    asset::AssetLoader,
     core_pipeline::clear_color::ClearColorConfig,
     prelude::*,
     render::{
@@ -12,22 +20,126 @@ use bevy::{
         texture::ImageSampler,
         view::RenderLayers,
     },
+    tasks::{AsyncComputeTaskPool, ComputeTaskPool, Task},
 };
 use bevy_aseprite::AsepriteBundle;
 use bevy_nine_slice_ui::NineSliceUiTexture;
+use rfd::AsyncFileDialog;
+use std::sync::mpsc::{channel, Receiver, Sender};
+use std::sync::Arc;
+use std::{future::Future, sync::Mutex};
 
 pub struct MenuPlugin;
 impl Plugin for MenuPlugin {
     fn build(&self, app: &mut App) {
-        app.add_systems(OnEnter(GameState::Menu), spawn_menue);
-        app.add_systems(Update, hover_effect);
+        app.init_resource::<FileDialogState>();
+        app.add_event::<FileLoadedEvent>();
+        app.add_systems(OnEnter(GameState::Menu), spawn_menu);
+        app.add_systems(
+            Update,
+            (hover_effect, dialog_state_checker, load_custom_level),
+        );
     }
 }
 
 #[derive(Component)]
-pub struct LevelSelectorButton(pub usize);
+pub struct LevelSelectorButton(pub Handle<LevelAsset>);
 
-fn hover_effect(_cmd: Commands, mut query: Query<(Entity, &Interaction, &mut NineSliceUiTexture)>) {
+#[derive(Component)]
+pub struct LevelLoadButton;
+
+#[derive(Component)]
+pub struct BackToMenuButton;
+
+#[derive(Event)]
+pub struct FileLoadedEvent {
+    pub file: String,
+    pub content: Vec<u8>,
+}
+
+fn dialog_state_checker(
+    mut state: ResMut<FileDialogState>,
+    mut events: EventWriter<LoadLevelEvent>,
+    mut levels: ResMut<Assets<LevelAsset>>,
+    mut next_state: ResMut<NextState<GameState>>,
+) {
+    if state.loading {
+        let Ok(data) = state.channel.1.try_recv() else {
+            return;
+        };
+        info!("file loaded");
+        state.loading = false;
+
+        let Ok(asset) = LevelAsset::try_from(data.as_slice()) else {
+            return;
+        };
+
+        next_state.set(GameState::GameOver);
+        let handle = levels.add(asset);
+        events.send(LoadLevelEvent::new(handle));
+    }
+}
+
+
+#[derive(Resource)]
+pub struct FileDialogState {
+    loading: bool,
+    channel: (Sender<Vec<u8>>, Receiver<Vec<u8>>),
+}
+
+impl Default for FileDialogState {
+    fn default() -> Self {
+        let (tx, rx) = channel();
+        Self {
+            loading: false,
+            channel: (tx, rx),
+        }
+    }
+}
+
+unsafe impl Send for FileDialogState {}
+unsafe impl Sync for FileDialogState {}
+
+fn load_custom_level(
+    buttons: Query<&Interaction, With<LevelLoadButton>>,
+    mut state: ResMut<FileDialogState>,
+) {
+    buttons.iter().for_each(|interaction| match interaction {
+        Interaction::Pressed => {
+            info!("clicked");
+
+            if state.loading {
+                return;
+            }
+
+            state.loading = true;
+            futures_lite::future::block_on(async {
+                let dialog_future = AsyncFileDialog::new()
+                    .set_title("Load a custom Level form a .ron file")
+                    .add_filter("ron", &["ron"])
+                    .pick_file();
+
+                let sender = state.channel.0.clone();
+                let file_handle = AsyncComputeTaskPool::get()
+                    .spawn(async move {
+                        let dialog = AsyncFileDialog::new()
+                            .set_title("Load a custom Level form a .ron file")
+                            .add_filter("ron", &["ron"])
+                            .pick_file();
+
+                        let file = dialog.await.unwrap();
+                        let content = file.read().await;
+                        sender.send(content).unwrap();
+                    })
+                    .detach();
+            });
+        }
+        _ => {}
+    });
+}
+
+
+fn hover_effect(mut query: Query<(Entity, &Interaction, &mut NineSliceUiTexture)>) {
     query
         .iter_mut()
         .for_each(|(_ent, interaction, mut texture)| match interaction {
@@ -40,8 +152,7 @@ fn hover_effect(_cmd: Commands, mut query: Query<(Entity, &Interaction, &mut Nin
             _ => {}
         })
 }
-
-fn spawn_menue(mut cmd: Commands, server: Res<AssetServer>, mut images: ResMut<Assets<Image>>) {
+fn spawn_menu(mut cmd: Commands, server: Res<AssetServer>, mut images: ResMut<Assets<Image>>) {
     let size = Extent3d {
         width: 200,
         height: 200,
@@ -168,7 +279,7 @@ fn spawn_menue(mut cmd: Commands, server: Res<AssetServer>, mut images: ResMut<A
                 },
                 ..default()
             })
-            .insert(LevelSelectorButton(0))
+            .insert(LevelSelectorButton(server.load(CAMPAIGN_LEVELS[0])))
             .insert(NineSliceUiTexture::from_slice(
                 server.load("sprites/ui.png"),
                 Rect::new(48., 0., 96., 48.),
@@ -199,7 +310,7 @@ fn spawn_menue(mut cmd: Commands, server: Res<AssetServer>, mut images: ResMut<A
                 },
                 ..default()
             })
-            .insert(LevelSelectorButton(0))
+            .insert(LevelLoadButton)
             .insert(NineSliceUiTexture::from_slice(
                 server.load("sprites/ui.png"),
                 Rect::new(48., 0., 96., 48.),
@@ -217,6 +328,23 @@ fn spawn_menue(mut cmd: Commands, server: Res<AssetServer>, mut images: ResMut<A
                     ..default()
                 });
             });
+
+            cmd.spawn(TextBundle {
+                style: Style {
+                            margin: UiRect::top(Val::Px(100.)),
+                            ..default()
+                        },
+                text: Text::from_section(
+                    "Click to run, Mouswheel to zoom\nbuild your own levels and share them!",
+                    TextStyle {
+                        font_size: 20.,
+                        color: Color::WHITE,
+                        ..default()
+                    },
+                ),
+                ..default()
+            });
+
         });
     });
 }

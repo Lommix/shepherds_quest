@@ -10,7 +10,6 @@ use bevy_rapier2d::{
 use crate::{
     animals::{animations::AnimalState, sheep::SheepTag},
     level::Score,
-    puls_material::PulsMaterial,
     util::LifeTime,
 };
 
@@ -18,7 +17,7 @@ use super::goal::{FAIL_GLOW, GLOW_MESH};
 pub struct TrapPlugin;
 impl Plugin for TrapPlugin {
     fn build(&self, app: &mut App) {
-        app.add_systems(Update, watch_trap_enter);
+        app.add_systems(Update, (watch_trap_enter, update_emission));
     }
 }
 
@@ -28,7 +27,7 @@ pub struct TrapTag;
 #[derive(Bundle)]
 pub struct TrapBundle {
     pub mesh: Handle<Mesh>,
-    pub material: Handle<PulsMaterial>,
+    pub material: Handle<StandardMaterial>,
     pub visibility: Visibility,
     pub inherited_visibility: InheritedVisibility,
     pub view_visibility: ViewVisibility,
@@ -56,6 +55,24 @@ impl Default for TrapBundle {
             name: Name::new("trap"),
         }
     }
+}
+
+fn update_emission(
+    query: Query<&Handle<StandardMaterial>, With<TrapTag>>,
+    time: Res<Time>,
+    mut materials: ResMut<Assets<StandardMaterial>>,
+) {
+    query.iter().for_each(|handle| {
+        let Some(material) = materials.get_mut(handle) else {
+            return;
+        };
+        // not gonna extend the standard material shader for this, lol
+        material.base_color = Color::rgb(
+            time.elapsed().as_secs_f32().sin().abs() * 3. + 0.2,
+            0.0,
+            0.0,
+        );
+    });
 }
 
 fn watch_trap_enter(

@@ -8,8 +8,9 @@ use crate::{
 
 use super::{
     builder::LoadLevelEvent,
+    loader::LevelAsset,
     progress::{LevelLost, LevelWon},
-    CurrentLevel, CAMPAIGN_LEVELS,
+    Levels,
 };
 pub struct LevelTransitionPlugin;
 impl Plugin for LevelTransitionPlugin {
@@ -19,36 +20,21 @@ impl Plugin for LevelTransitionPlugin {
     }
 }
 
-fn prepare_next_level(
-    mut events: EventWriter<LoadLevelEvent>,
-    current_level: Res<CurrentLevel>,
-    server: Res<AssetServer>,
-) {
-    if current_level.0 >= CAMPAIGN_LEVELS.len() {
-        info!("you beat the game");
-        return;
-    }
-
-    events.send(LoadLevelEvent::new(
-        server.load(CAMPAIGN_LEVELS[current_level.0]),
-    ));
+fn prepare_next_level(mut events: EventWriter<LoadLevelEvent>, current_level: Res<Levels>) {
+    events.send(LoadLevelEvent::new(current_level.current()));
 }
 
 fn level_select_button(
     mut state: ResMut<NextState<GameState>>,
-    mut current_level: ResMut<CurrentLevel>,
+    mut current_level: ResMut<Levels>,
     query: Query<(&Interaction, &LevelSelectorButton), Changed<Interaction>>,
 ) {
     query
         .iter()
         .for_each(|(interaction, selection)| match *interaction {
             Interaction::Pressed => {
-                if selection.0 >= CAMPAIGN_LEVELS.len() {
-                    state.set(GameState::Menu);
-                } else {
-                    state.set(GameState::GameOver);
-                    current_level.0 = selection.0;
-                }
+                current_level.set(selection.0.clone());
+                state.set(GameState::GameOver);
             }
             _ => {}
         });
@@ -57,7 +43,7 @@ fn level_select_button(
 fn retry_level(
     mut event: EventReader<LevelLost>,
     mut cmd: Commands,
-    current_level: Res<CurrentLevel>,
+    current_level: Res<Levels>,
     server: Res<AssetServer>,
 ) {
     if event.iter().next().is_none() {
@@ -75,14 +61,14 @@ fn retry_level(
     })
     .insert(AllowedState::new(GameState::Game))
     .with_children(|cmd| {
-        spawn_progress_button("retry", current_level.0, cmd, &server);
+        spawn_progress_button("retry", current_level.current(), cmd, &server);
     });
 }
 
 fn next_level(
     mut event: EventReader<LevelWon>,
     mut cmd: Commands,
-    mut current_level: ResMut<CurrentLevel>,
+    levels: Res<Levels>,
     server: Res<AssetServer>,
 ) {
     if event.iter().next().is_none() {
@@ -102,25 +88,34 @@ fn next_level(
     })
     .insert(AllowedState::new(GameState::Game))
     .with_children(|builder| {
-        if current_level.0 + 1 >= CAMPAIGN_LEVELS.len() {
-            spawn_progress_button(
-                "Back to Menu",
-                current_level.next_level() + 1,
-                builder,
-                &server,
-            );
 
-            return;
+        if let Some(next) = levels.next() {
+            spawn_progress_button("Next Level", next, builder, &server);
         } else {
-            spawn_progress_button("Next Level", current_level.next_level(), builder, &server);
-            spawn_progress_button("Retry", current_level.0, builder, &server);
+            // back to menue
         }
+        spawn_progress_button("Retry", levels.current(), builder, &server);
+        // if levels.is_custom() || levels.last_campaign_level() {
+        //     // back to menue
+        // } else {
+        //     let next = levels.next_campaign_level().unwrap();
+        //     let handle = server.load(CAMPAIGN_LEVELS[next]);
+        //     spawn_progress_button("Next Level", handle, builder, &server);
+        // }
+
+        // spawn_progress_button(
+        //     "Back to Menu",
+        //     current_level.next_level() + 1,
+        //     builder,
+        //     &server,
+        // );
+        // return;
     });
 }
 
 fn spawn_progress_button(
     text: &str,
-    level: usize,
+    level: Handle<LevelAsset>,
     cmd: &mut ChildBuilder,
     server: &Res<AssetServer>,
 ) -> Entity {

@@ -5,8 +5,8 @@ use bevy_rapier2d::{
     geometry::{Collider, ColliderMassProperties},
 };
 
-use super::{animations::AnimalState, physics::MoveTo, AnimalBehavior};
-use crate::state::{AllowedState, GameState};
+use super::{animations::AnimalState, physics::MoveTo};
+use crate::{state::{AllowedState, GameState}, level::loader::LevelAsset};
 
 pub struct DogPlugin;
 impl Plugin for DogPlugin {
@@ -67,9 +67,24 @@ impl Default for DogBundle {
 fn move_dogs(
     mut cmd: Commands,
     mut query: Query<(Entity, &mut Velocity, &MoveTo, &Transform), With<DogTag>>,
-    animal_behavior: Res<AnimalBehavior>,
+    levels: Res<Assets<LevelAsset>>,
+    level: Query<&Handle<LevelAsset>>,
     _time: Res<Time>,
 ) {
+
+
+    let Ok(handle) = level.get_single() else {
+        debug!("wtf you doing");
+        return;
+    };
+
+    let Some(level) = levels.get(handle) else {
+        return;
+    };
+
+    let animal_behavior = level.animal_behavior.as_ref().unwrap_or_default();
+
+
     query
         .iter_mut()
         .for_each(|(entity, mut velocity, move_to, transform)| {

@@ -29,20 +29,7 @@ impl AssetLoader for LevelAssetLoader {
         Box::pin(async move {
             let mut bytes = Vec::new();
             reader.read_to_end(&mut bytes).await.unwrap();
-            let mut asset = ron::de::from_bytes::<LevelAsset>(bytes.as_slice()).unwrap();
-            let parsed = LayoutIterator::new(&asset).collect::<Result<Vec<_>, _>>()?;
-
-            let size = parsed
-                .iter()
-                .max_by(|(a, _), (b, _)| {
-                    let a = a.x + a.y;
-                    let b = b.x + b.y;
-                    a.partial_cmp(&b).unwrap()
-                })
-                .expect("Empty level");
-
-            asset.size = Some(size.0);
-            asset.parsed = Some(parsed);
+            let asset = LevelAsset::try_from(bytes.as_slice())?;
             Ok(asset)
         })
     }
@@ -59,13 +46,68 @@ pub struct LevelAsset {
     pub win: String,
     pub loose: String,
     pub win_percent: f32,
-    pub llama_stomp_rate: f32,
-
+    pub animal_behavior: Option<AnimalBehavior>,
     pub layout: String,
     #[serde(skip)]
     pub parsed: Option<Vec<(Vec2, Tiles)>>,
     #[serde(skip)]
     pub size: Option<Vec2>,
+}
+
+impl TryFrom<&[u8]> for LevelAsset {
+    type Error = anyhow::Error;
+    fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
+        let mut asset = ron::de::from_bytes(value).map_err(|e| anyhow::anyhow!("{}", e))?;
+        let parsed = LayoutIterator::new(&asset).collect::<Result<Vec<_>, _>>()?;
+
+        let size = parsed
+            .iter()
+            .max_by(|(a, _), (b, _)| {
+                let a = a.x + a.y;
+                let b = b.x + b.y;
+                a.partial_cmp(&b).unwrap()
+            })
+            .expect("Empty level");
+
+        asset.size = Some(size.0);
+        asset.parsed = Some(parsed);
+        Ok(asset)
+    }
+}
+
+#[derive(Deserialize, Debug)]
+pub struct AnimalBehavior {
+    pub alignment: f32,
+    pub cohesion: f32,
+    pub separation: f32,
+    pub sheep_speed: f32,
+    pub vision: f32,
+    pub fear: f32,
+    pub motivation: f32,
+    pub dog_speed: f32,
+    pub llama_stomp_rate: f32,
+    pub llama_stomp_range: f32,
+    pub llama_stomp_force: f32,
+}
+
+const DEFAULT_BEHAVIOR: AnimalBehavior = AnimalBehavior {
+    alignment: 1.0,
+    cohesion: 1.0,
+    separation: 0.5,
+    sheep_speed: 32.0,
+    vision: 20.0,
+    fear: 1.0,
+    motivation: 0.1,
+    dog_speed: 50.0,
+    llama_stomp_rate: 5.,
+    llama_stomp_range: 32.,
+    llama_stomp_force: 600.,
+};
+
+impl Default for &AnimalBehavior {
+    fn default() -> Self {
+        &DEFAULT_BEHAVIOR
+    }
 }
 
 #[derive(Debug)]

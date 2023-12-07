@@ -1,6 +1,6 @@
 use std::time::Duration;
 
-use bevy::{gltf::Gltf, pbr::ExtendedMaterial, prelude::*};
+use bevy::{gltf::Gltf, prelude::*};
 use bevy_rapier2d::{
     dynamics::ExternalImpulse, geometry::Collider, pipeline::QueryFilter, plugin::RapierContext,
 };
@@ -9,14 +9,10 @@ use bevy_tweening::{
 };
 
 use crate::{
-    level::{loader::LevelAsset, CurrentLevel},
+    level::{loader::LevelAsset},
     state::{AllowedState, GameState},
     util::Cooldown,
 };
-
-const LLAMA_RANGE: f32 = 20.;
-const LLAMA_STOMP_COOLDOWN: f32 = 2.;
-const LLAMA_STOMP_FORCE: f32 = 1000.;
 
 use super::{
     animations::AnimalState,
@@ -28,7 +24,8 @@ impl Plugin for LlamaPlugin {
     fn build(&self, app: &mut App) {
         app.add_systems(
             Update,
-            (llama_stomp, add_telegraph_to_llama, update_progress),
+            (llama_stomp, add_telegraph_to_llama, update_progress)
+                .run_if(in_state(GameState::Game)),
         );
     }
 }
@@ -72,12 +69,11 @@ fn llama_stomp(
     mut cmd: Commands,
     mut query: Query<(Entity, &mut AnimalState, &Children), (With<LLamaTag>, Without<Cooldown>)>,
     telegraphs: Query<With<TelegraphTag>>,
+    levels: Res<Assets<LevelAsset>>,
     level: Query<&Handle<LevelAsset>>,
     positions: Query<&Transform>,
     sheeps: Query<With<SheepTag>>,
     rapier_context: Res<RapierContext>,
-    _current_level: Res<CurrentLevel>,
-    levels: Res<Assets<LevelAsset>>,
 ) {
     let Ok(handle) = level.get_single() else {
         debug!("wtf you doing");
@@ -88,14 +84,15 @@ fn llama_stomp(
         return;
     };
 
+    let animal_behavior = level.animal_behavior.as_ref().unwrap_or_default();
+
     query
         .iter_mut()
         .for_each(|(entity, _animal_state, children)| {
             let Ok(transform) = positions.get(entity) else {
                 return;
             };
-
-            let collider = Collider::ball(LLAMA_RANGE);
+            let collider = Collider::ball(animal_behavior.llama_stomp_range);
             let mut sheeps_in_range = Vec::new();
             rapier_context.intersections_with_shape(
                 transform.translation.truncate(),
@@ -113,7 +110,8 @@ fn llama_stomp(
                     cmd.entity(e)
                         .insert(Cooldown::new(Duration::from_secs_f32(0.5)))
                         .insert(ExternalImpulse {
-                            impulse: direction_to_sheep.normalize() * LLAMA_STOMP_FORCE,
+                            impulse: direction_to_sheep.normalize()
+                                * animal_behavior.llama_stomp_force,
                             ..default()
                         });
 
@@ -148,17 +146,30 @@ fn llama_stomp(
 
             cmd.entity(entity)
                 .insert(Cooldown::new(Duration::from_secs_f32(
-                    level.llama_stomp_rate + rand::random::<f32>() * 2.,
+                    animal_behavior.llama_stomp_rate + rand::random::<f32>() * 2.,
                 )));
         });
 }
 
 fn add_telegraph_to_llama(
     query: Query<Entity, Added<LLamaTag>>,
+    level: Query<&Handle<LevelAsset>>,
+    levels: Res<Assets<LevelAsset>>,
     mut cmd: Commands,
     mut meshes: ResMut<Assets<Mesh>>,
     mut materials: ResMut<Assets<TelegraphMaterial>>,
 ) {
+    let Ok(handle) = level.get_single() else {
+        debug!("wtf you doing");
+        return;
+    };
+
+    let Some(level) = levels.get(handle) else {
+        return;
+    };
+
+    let animal_behavior = level.animal_behavior.as_ref().unwrap_or_default();
+
     query.iter().for_each(|entity| {
         let material = TelegraphMaterial {
             progress: Vec4::new(0.5, 0., 0., 0.),
@@ -167,7 +178,9 @@ fn add_telegraph_to_llama(
 
         cmd.entity(entity).with_children(|cmd| {
             cmd.spawn(TelegraphBundle {
-                mesh: meshes.add(Mesh::from(shape::Quad::new(Vec2::splat(LLAMA_RANGE)))),
+                mesh: meshes.add(Mesh::from(shape::Quad::new(Vec2::splat(
+                    animal_behavior.llama_stomp_range,
+                )))),
                 material: materials.add(material),
                 transform: Transform::from_xyz(0., 0., 0.1),
                 ..default()
