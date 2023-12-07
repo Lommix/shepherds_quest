@@ -223,7 +223,7 @@ fn spawn_ui(mut cmd: Commands, portrait: Res<PortraitRender>, server: Res<AssetS
                         position_type: PositionType::Absolute,
                         right: Val::Px(10.),
                         bottom: Val::Px(10.),
-                        padding: UiRect::all(Val::Px(5.)),
+                        padding: UiRect::all(Val::Px(10.)),
                         ..default()
                     },
                     ..default()

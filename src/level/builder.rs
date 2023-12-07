@@ -1,10 +1,12 @@
 use std::time::Duration;
 
 use bevy::prelude::*;
+use bevy_aseprite::AsepriteSliceBundle;
 use bevy_rapier2d::{dynamics::RigidBody, geometry::Collider};
 use bevy_tweening::{
     lens::TransformPositionLens, Animator, EaseFunction, RepeatCount, RepeatStrategy, Tween,
 };
+use rand::Rng;
 
 use crate::{
     animals::{dog::DogBundle, llama::LLamaBundle, physics::MoveTo, sheep::SheepBundle},
@@ -273,5 +275,36 @@ fn load_level(
 
         cmd.entity(entity).insert(LevelLoaded);
         dialog.sections[0].value = level.intro.clone();
+
+        let level_size = level.size.unwrap() + Vec2::splat(TILE_SIZE);
+        for i in 0..50 {
+
+            let padding: f32 = 50.; // e.g., 20.0
+            let mut rng = rand::thread_rng();
+
+            let (x, y) = if rng.gen_bool(0.5) {
+                let x = rng.gen_range(-padding..level_size.x + padding);
+                let y = if rng.gen_bool(0.5) {
+                    rng.gen_range(level_size.y..level_size.y + padding)
+                } else {
+                    rng.gen_range(-padding..0.0)
+                };
+                (x, y)
+            } else {
+                let y = rng.gen_range(-padding..level_size.y + padding);
+                let x = if rng.gen_bool(0.5) {
+                    rng.gen_range(level_size.x..level_size.x + padding)
+                } else {
+                    rng.gen_range(-padding..0.0)
+                };
+                (x, y)
+            };
+
+            cmd.spawn(SceneBundle {
+                scene: server.load("models/tree.glb#Scene0"),
+                transform: Transform::from_translation(Vec3::new(x as f32, y as f32, 0.)),
+                ..default()
+            });
+        }
     });
 }

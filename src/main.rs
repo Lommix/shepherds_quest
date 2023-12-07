@@ -1,4 +1,7 @@
-use bevy::{asset::AssetMetaCheck, audio::{Volume, VolumeLevel, PlaybackMode}};
+use bevy::{
+    asset::AssetMetaCheck,
+    audio::{PlaybackMode, Volume, VolumeLevel},
+};
 #[allow(unused)]
 use bevy::{
     gltf::Gltf, prelude::*, render::texture::ImageSamplerDescriptor, window::WindowResolution,
@@ -79,7 +82,7 @@ fn main() {
             brightness: 0.2,
         })
         .insert_resource(VolumeControl::default())
-        .add_systems(Startup,background_music)
+        .add_systems(Startup, background_music)
         .run();
 }
 
@@ -97,8 +100,8 @@ impl Default for VolumeControl {
     }
 }
 
-fn background_music(mut cmd : Commands, server : Res<AssetServer>, volume : Res<VolumeControl>) {
-    cmd.spawn(AudioBundle{
+fn background_music(mut cmd: Commands, server: Res<AssetServer>, volume: Res<VolumeControl>) {
+    cmd.spawn(AudioBundle {
         source: server.load("audio/forest.ogg"),
         settings: PlaybackSettings {
             mode: PlaybackMode::Loop,

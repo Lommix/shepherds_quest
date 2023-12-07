@@ -37,8 +37,9 @@ impl Plugin for MenuPlugin {
         app.add_systems(OnEnter(GameState::Menu), spawn_menu);
         app.add_systems(
             Update,
-            (hover_effect, dialog_state_checker, load_custom_level),
+            dialog_state_checker.run_if(in_state(GameState::Menu)),
         );
+        app.add_systems(Update, (hover_effect, load_custom_level));
     }
 }
 
