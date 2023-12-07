@@ -1,8 +1,13 @@
-use bevy::{input::mouse::MouseButtonInput, prelude::*};
+use bevy::{
+    audio::{PlaybackMode, Volume, VolumeLevel},
+    input::mouse::MouseButtonInput,
+    prelude::*,
+};
 
 use crate::{
     animals::{dog::DogTag, physics::MoveTo},
     camera::MainCamera,
+    VolumeControl,
 };
 
 pub struct ControlPlugin;
@@ -76,10 +81,18 @@ fn intersect_ray_with_z_zero(origin: Vec3, direction: Vec3) -> Option<Vec3> {
     }
 }
 
+const DOG_SOUNDS: [&str; 2] = ["audio/dog_1.ogg", "audio/dog_2.ogg"];
+
+#[derive(Component)]
+pub struct DogSound;
+
 fn command_dog(
     mut cmd: Commands,
     mut dogs: Query<(Entity, Option<&mut MoveTo>), With<DogTag>>,
     mut click_events: EventReader<MapClickEvent>,
+    dog_sounds: Query<With<DogSound>>,
+    server: Res<AssetServer>,
+    volume: Res<VolumeControl>,
 ) {
     click_events.read().for_each(|event| {
         dogs.iter_mut().for_each(|(ent, move_to)| {
@@ -90,6 +103,23 @@ fn command_dog(
                     cmd.entity(ent)
                         .insert(MoveTo::new(event.translation().truncate()));
                 }
+
+                let random = rand::random::<usize>() % DOG_SOUNDS.len();
+
+                if dog_sounds.iter().count() > 0 {
+                    return;
+                }
+
+                cmd.spawn(AudioBundle {
+                    source: server.load(DOG_SOUNDS[random]),
+                    settings: PlaybackSettings {
+                        mode: PlaybackMode::Despawn,
+                        volume: Volume::Absolute(VolumeLevel::new(volume.effects * 2.)),
+                        ..default()
+                    },
+                    ..default()
+                })
+                .insert(DogSound);
             }
         });
     });

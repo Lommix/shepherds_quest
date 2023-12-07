@@ -1,6 +1,9 @@
 use std::time::Duration;
 
-use bevy::prelude::*;
+use bevy::{
+    audio::{PlaybackMode, Volume, VolumeLevel},
+    prelude::*,
+};
 use bevy_rapier2d::{
     dynamics::Velocity,
     geometry::{Collider, Sensor},
@@ -10,7 +13,7 @@ use bevy_rapier2d::{
 use crate::{
     animals::{animations::AnimalState, sheep::SheepTag},
     level::Score,
-    util::LifeTime,
+    util::LifeTime, VolumeControl,
 };
 
 use super::goal::{FAIL_GLOW, GLOW_MESH};
@@ -23,6 +26,9 @@ impl Plugin for TrapPlugin {
 
 #[derive(Component)]
 pub struct TrapTag;
+
+#[derive(Component)]
+pub struct DeathSound;
 
 #[derive(Bundle)]
 pub struct TrapBundle {
@@ -82,6 +88,9 @@ fn watch_trap_enter(
     goals: Query<Entity, With<TrapTag>>,
     sheeps: Query<Entity, With<SheepTag>>,
     rapier_context: Res<RapierContext>,
+    server: Res<AssetServer>,
+    death_sound: Query<With<DeathSound>>,
+    volume : Res<VolumeControl>,
 ) {
     goals.iter().for_each(|entity| {
         rapier_context
@@ -104,6 +113,21 @@ fn watch_trap_enter(
                             ..default()
                         });
                     });
+
+                if death_sound.iter().count() > 2 {
+                    return;
+                }
+
+                cmd.spawn(AudioBundle {
+                    source: server.load("audio/sheep_death.ogg"),
+                    settings: PlaybackSettings {
+                        mode: PlaybackMode::Despawn,
+                        volume: Volume::Absolute(VolumeLevel::new(volume.effects * 0.5)),
+                        ..default()
+                    },
+                    ..default()
+                })
+                .insert(DeathSound);
 
                 score.lost += 1;
             })

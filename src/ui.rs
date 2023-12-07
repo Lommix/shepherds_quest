@@ -296,8 +296,8 @@ fn portrait_render_scene(
     mut images: ResMut<Assets<Image>>,
 ) {
     let size = Extent3d {
-        width: 100,
-        height: 100,
+        width: 128,
+        height: 128,
         ..default()
     };
 
@@ -327,14 +327,14 @@ fn portrait_render_scene(
             ..default()
         },
         camera_2d: Camera2d {
-            clear_color: ClearColorConfig::Custom(Color::BLUE.with_a(0.)),
+            clear_color: ClearColorConfig::Custom(Color::GRAY.with_a(0.)),
         },
         ..default()
     })
     .insert(PORTRAIT_LAYER);
 
     cmd.spawn(AsepriteBundle {
-        aseprite: server.load("sprites/sheperd.aseprite"),
+        aseprite: server.load("sprites/alien.aseprite"),
         ..default()
     })
     .insert(PORTRAIT_LAYER);

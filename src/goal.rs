@@ -1,6 +1,9 @@
 use std::time::Duration;
 
-use bevy::prelude::*;
+use bevy::{
+    audio::{PlaybackMode, Volume, VolumeLevel},
+    prelude::*,
+};
 use bevy_rapier2d::{
     dynamics::Velocity,
     geometry::{Collider, Sensor},
@@ -11,6 +14,7 @@ use crate::{
     animals::{animations::AnimalState, sheep::SheepTag},
     level::Score,
     util::LifeTime,
+    VolumeControl,
 };
 
 pub const SUCCESS_GLOW: Handle<StandardMaterial> = Handle::weak_from_u128(12561396483470153565671);
@@ -48,6 +52,9 @@ impl Plugin for GoalPlugin {
 
 #[derive(Component)]
 pub struct GoalTag;
+
+#[derive(Component)]
+pub struct GoalSound;
 
 #[derive(Bundle)]
 pub struct GoalBundle {
@@ -89,6 +96,9 @@ fn watch_goal_enter(
     goals: Query<Entity, With<GoalTag>>,
     sheeps: Query<Entity, With<SheepTag>>,
     rapier_context: Res<RapierContext>,
+    server: Res<AssetServer>,
+    sheep_sound: Query<With<GoalSound>>,
+    volume: Res<VolumeControl>,
 ) {
     goals.iter().for_each(|entity| {
         rapier_context
@@ -111,6 +121,21 @@ fn watch_goal_enter(
                             ..default()
                         });
                     });
+
+                if sheep_sound.iter().count() > 2 {
+                    return;
+                }
+
+                cmd.spawn(AudioBundle {
+                    source: server.load("audio/sheep.ogg"),
+                    settings: PlaybackSettings {
+                        mode: PlaybackMode::Despawn,
+                        volume: Volume::Absolute(VolumeLevel::new(volume.effects * 0.5)),
+                        ..default()
+                    },
+                    ..default()
+                })
+                .insert(GoalSound);
 
                 score.saved += 1;
             })
