@@ -4,7 +4,7 @@ use crate::{
     level::{
         builder::LoadLevelEvent,
         loader::{LevelAsset, LevelAssetLoader},
-        CAMPAIGN_LEVELS,
+        Levels, CAMPAIGN_LEVELS,
     },
     state::{AllowedState, GameState},
 };
@@ -48,9 +48,6 @@ pub struct LevelSelectorButton(pub Handle<LevelAsset>);
 #[derive(Component)]
 pub struct LevelLoadButton;
 
-#[derive(Component)]
-pub struct BackToMenuButton;
-
 #[derive(Event)]
 pub struct FileLoadedEvent {
     pub file: String,
@@ -60,13 +57,15 @@ pub struct FileLoadedEvent {
 fn dialog_state_checker(
     mut state: ResMut<FileDialogState>,
     mut events: EventWriter<LoadLevelEvent>,
-    mut levels: ResMut<Assets<LevelAsset>>,
+    mut level_assets: ResMut<Assets<LevelAsset>>,
     mut next_state: ResMut<NextState<GameState>>,
+    mut levels: ResMut<Levels>,
 ) {
     if state.loading {
         let Ok(data) = state.channel.1.try_recv() else {
             return;
         };
+
         info!("file loaded");
         state.loading = false;
 
@@ -74,12 +73,11 @@ fn dialog_state_checker(
             return;
         };
 
+        let handle = level_assets.add(asset);
+        levels.set(handle.clone());
         next_state.set(GameState::GameOver);
-        let handle = levels.add(asset);
-        events.send(LoadLevelEvent::new(handle));
     }
 }
-
 
 #[derive(Resource)]
 pub struct FileDialogState {
@@ -137,7 +135,6 @@ fn load_custom_level(
         _ => {}
     });
 }
-
 
 fn hover_effect(mut query: Query<(Entity, &Interaction, &mut NineSliceUiTexture)>) {
     query

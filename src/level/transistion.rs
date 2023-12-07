@@ -15,7 +15,10 @@ use super::{
 pub struct LevelTransitionPlugin;
 impl Plugin for LevelTransitionPlugin {
     fn build(&self, app: &mut App) {
-        app.add_systems(Update, (retry_level, next_level, level_select_button));
+        app.add_systems(
+            Update,
+            (retry_level, next_level, level_select_button),
+        );
         app.add_systems(OnEnter(GameState::GameOver), prepare_next_level);
     }
 }
@@ -39,6 +42,7 @@ fn level_select_button(
             _ => {}
         });
 }
+
 
 fn retry_level(
     mut event: EventReader<LevelLost>,
@@ -88,28 +92,10 @@ fn next_level(
     })
     .insert(AllowedState::new(GameState::Game))
     .with_children(|builder| {
-
         if let Some(next) = levels.next() {
             spawn_progress_button("Next Level", next, builder, &server);
-        } else {
-            // back to menue
         }
         spawn_progress_button("Retry", levels.current(), builder, &server);
-        // if levels.is_custom() || levels.last_campaign_level() {
-        //     // back to menue
-        // } else {
-        //     let next = levels.next_campaign_level().unwrap();
-        //     let handle = server.load(CAMPAIGN_LEVELS[next]);
-        //     spawn_progress_button("Next Level", handle, builder, &server);
-        // }
-
-        // spawn_progress_button(
-        //     "Back to Menu",
-        //     current_level.next_level() + 1,
-        //     builder,
-        //     &server,
-        // );
-        // return;
     });
 }
 

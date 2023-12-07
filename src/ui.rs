@@ -1,6 +1,9 @@
 use std::time::Duration;
 
-use crate::{state::{AllowedState, GameState}, level::Score};
+use crate::{
+    level::Score,
+    state::{AllowedState, GameState},
+};
 use bevy::{
     core_pipeline::clear_color::ClearColorConfig,
     prelude::*,
@@ -14,7 +17,7 @@ use bevy::{
     },
     time::common_conditions::on_timer,
 };
-use bevy_aseprite::{AsepriteBundle};
+use bevy_aseprite::AsepriteBundle;
 use bevy_nine_slice_ui::{NineSliceUiMaterialBundle, NineSliceUiTexture};
 
 const PORTRAIT_LAYER: RenderLayers = RenderLayers::layer(2);
@@ -29,11 +32,15 @@ impl Plugin for UiPlugin {
             Update,
             update_ui.run_if(on_timer(Duration::from_millis(100))),
         );
+        app.add_systems(Update, back_to_menu);
     }
 }
 
 #[derive(Resource, Default)]
 struct PortraitRender(Handle<Image>);
+
+#[derive(Component)]
+pub struct BackToMenuButton;
 
 #[derive(Component)]
 pub struct Dialog;
@@ -61,7 +68,7 @@ fn update_ui(
     });
 }
 
-fn spawn_ui(mut cmd: Commands, portrait: Res<PortraitRender>, asset_server: Res<AssetServer>) {
+fn spawn_ui(mut cmd: Commands, portrait: Res<PortraitRender>, server: Res<AssetServer>) {
     info!("spawning ui");
     cmd.spawn(NodeBundle {
         style: Style {
@@ -112,12 +119,6 @@ fn spawn_ui(mut cmd: Commands, portrait: Res<PortraitRender>, asset_server: Res<
                         margin: UiRect::all(Val::Px(5.)),
                         ..default()
                     },
-                    // nine_slice_texture: NineSliceUiTexture::from_slice(
-                    //     asset_server.load("sprites/ui.png"),
-                    //     Rect::new(0., 0., 48., 48.),
-                    // )
-                    // .with_blend_color(Color::GREEN)
-                    // .with_blend_mix(0.02),
                     ..default()
                 })
                 .with_children(|cmd| {
@@ -147,13 +148,6 @@ fn spawn_ui(mut cmd: Commands, portrait: Res<PortraitRender>, asset_server: Res<
                         ..default()
                     },
                     ..default()
-                    // nine_slice_texture: NineSliceUiTexture::from_slice(
-                    //     asset_server.load("sprites/ui.png"),
-                    //     Rect::new(0., 0., 48., 48.),
-                    // )
-                    // .with_blend_color(Color::RED)
-                    // .with_blend_mix(0.01),
-                    // ..default()
                 })
                 .with_children(|cmd| {
                     cmd.spawn(TextBundle {
@@ -203,7 +197,7 @@ fn spawn_ui(mut cmd: Commands, portrait: Res<PortraitRender>, asset_server: Res<
                     ..default()
                 },
                 nine_slice_texture: NineSliceUiTexture::from_slice(
-                    asset_server.load("sprites/ui.png"),
+                    server.load("sprites/ui.png"),
                     Rect::new(0., 0., 48., 48.),
                 ),
                 ..default()
@@ -221,6 +215,36 @@ fn spawn_ui(mut cmd: Commands, portrait: Res<PortraitRender>, asset_server: Res<
                     },
                     image: UiImage::new(portrait.0.clone()),
                     ..default()
+                });
+
+                //back to menu
+                cmd.spawn(ButtonBundle {
+                    style: Style {
+                        position_type: PositionType::Absolute,
+                        right: Val::Px(10.),
+                        bottom: Val::Px(10.),
+                        padding: UiRect::all(Val::Px(5.)),
+                        ..default()
+                    },
+                    ..default()
+                })
+                .insert(BackToMenuButton)
+                .insert(NineSliceUiTexture::from_slice(
+                    server.load("sprites/ui.png"),
+                    Rect::new(48., 0., 96., 48.),
+                ))
+                .with_children(|cmd| {
+                    cmd.spawn(TextBundle {
+                        text: Text::from_section(
+                            "Back to Menu",
+                            TextStyle {
+                                font_size: 24.,
+                                color: Color::WHITE,
+                                ..default()
+                            },
+                        ),
+                        ..default()
+                    });
                 });
 
                 //dialog
@@ -249,6 +273,20 @@ fn spawn_ui(mut cmd: Commands, portrait: Res<PortraitRender>, asset_server: Res<
             });
         });
     });
+}
+
+fn back_to_menu(
+    mut state: ResMut<NextState<GameState>>,
+    query: Query<(&Interaction, &BackToMenuButton), Changed<Interaction>>,
+) {
+    query
+        .iter()
+        .for_each(|(interaction, _)| match *interaction {
+            Interaction::Pressed => {
+                state.set(GameState::Menu);
+            }
+            _ => {}
+        });
 }
 
 fn portrait_render_scene(
