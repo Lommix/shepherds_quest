@@ -20,7 +20,8 @@ pub enum GameState {
     Loading,
     Menu,
     Game,
-    GameOver,
+    Prepare,
+    Credits,
 }
 
 #[derive(Component)]

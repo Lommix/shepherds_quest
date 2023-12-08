@@ -7,6 +7,7 @@ My bevy jam #4 entry.
 
 https://opengameart.org/content/low-poly-3d-flying-saucer-model
 https://opengameart.org/content/lowpoly-animated-farm-animal-pack
+https://opengameart.org/content/textured-low-poly-pine
 https://opengameart.org/content/forest
 
 

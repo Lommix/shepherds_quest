@@ -22,6 +22,7 @@ mod controls;
 mod goal;
 mod level;
 mod menu;
+mod settings;
 mod state;
 mod trap;
 mod ui;
@@ -66,8 +67,7 @@ fn main() {
             level::LevelPlugin,
         ))
         .add_plugins((
-            // bevy_kira_audio::AudioPlugin,
-            // audio::GameAudioPlugin,
+            settings::SettingsPlugin,
             trap::TrapPlugin,
             goal::GoalPlugin,
             ui::UiPlugin,

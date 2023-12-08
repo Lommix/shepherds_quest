@@ -101,16 +101,6 @@ fn load_level(
             ..default()
         });
 
-        // let lava_material = liquid_materials.add(PulsMaterial {
-        //     noise: server.load("sprites/lava.png"),
-        //     uniforms: LiquidData {
-        //         color: Color::RED,
-        //         threshold: Color::RED * 0.3,
-        //         intensity: 50.,
-        //         ..default()
-        //     },
-        // });
-
         let lava_material = materials.add(StandardMaterial {
             base_color_texture: Some(server.load("sprites/lava.png")),
             normal_map_texture: Some(server.load("sprites/lava_n.png")),
@@ -168,15 +158,19 @@ fn load_level(
                     }
 
                     if matches!(tile, Tiles::Sheep) {
-                        (0..level.sheeps_per_spawn).for_each(|_i| {
-                            let transform = Transform::from_translation(pos.extend(0.));
+
+                        let mut out = Vec::new();
+                        circle_formation(2., 2., level.sheeps_per_spawn, &mut out);
+
+                        (0..level.sheeps_per_spawn).zip(out.iter()).for_each(|( _, offset )| {
+                            let transform = Transform::from_translation(pos.extend(0.) + *offset);
                             cmd.spawn(SheepBundle {
                                 scene: server.load("models/sheep.glb#Scene0"),
                                 gltf: server.load("models/sheep.glb"),
                                 transform,
                                 ..default()
-                            })
-                            .insert(MoveTo::new(*pos));
+                            });
+                            // .insert(MoveTo::new(*pos));
                         });
                     }
                 }
@@ -278,7 +272,6 @@ fn load_level(
 
         let level_size = level.size.unwrap() + Vec2::splat(TILE_SIZE);
         for i in 0..50 {
-
             let padding: f32 = 50.; // e.g., 20.0
             let mut rng = rand::thread_rng();
 
@@ -307,4 +300,24 @@ fn load_level(
             });
         }
     });
+}
+
+fn circle_formation(padding: f32, radius: f32, max_postions: usize, out: &mut Vec<Vec3>) {
+    let circumference = 2. * std::f32::consts::PI * radius;
+    let available_space = circumference / padding;
+
+    let step = 2. * std::f32::consts::PI / available_space;
+
+    for i in 0..max_postions {
+        let angle = i as f32 * step;
+        let x = angle.cos() * radius;
+        let y = angle.sin() * radius;
+        out.push(Vec3::new(x, y, 0.));
+    }
+
+    if max_postions <= out.len() {
+        return;
+    }
+
+    circle_formation(padding, radius + padding, max_postions, out);
 }

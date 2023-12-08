@@ -76,7 +76,7 @@ fn dialog_state_checker(
 
         let handle = level_assets.add(asset);
         levels.set(handle.clone());
-        next_state.set(GameState::GameOver);
+        next_state.set(GameState::Prepare);
     }
 }
 

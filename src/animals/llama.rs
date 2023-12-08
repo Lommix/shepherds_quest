@@ -9,13 +9,12 @@ use bevy_tweening::{
 };
 
 use crate::{
-    level::{loader::LevelAsset},
+    level::loader::LevelAsset,
     state::{AllowedState, GameState},
     util::Cooldown,
 };
 
 use super::{
-    animations::AnimalState,
     sheep::SheepTag,
     telegraph::{TelegraphBundle, TelegraphMaterial, TelegraphTag},
 };
@@ -33,12 +32,14 @@ impl Plugin for LlamaPlugin {
 #[derive(Component)]
 pub struct LLamaTag;
 
+#[derive(Component)]
+pub struct JumpTag;
+
 #[derive(Bundle)]
 pub struct LLamaBundle {
     pub scene: Handle<Scene>,
     pub gltf: Handle<Gltf>,
     pub llama_tag: LLamaTag,
-    pub state: AnimalState,
     pub visibility: Visibility,
     pub inherited_visibility: InheritedVisibility,
     pub view_visibility: ViewVisibility,
@@ -53,7 +54,6 @@ impl Default for LLamaBundle {
             scene: Handle::default(),
             gltf: Handle::default(),
             llama_tag: LLamaTag,
-            state: AnimalState::Idle,
             visibility: Visibility::Inherited,
             inherited_visibility: InheritedVisibility::HIDDEN,
             view_visibility: ViewVisibility::HIDDEN,
@@ -67,7 +67,7 @@ impl Default for LLamaBundle {
 
 fn llama_stomp(
     mut cmd: Commands,
-    mut query: Query<(Entity, &mut AnimalState, &Children), (With<LLamaTag>, Without<Cooldown>)>,
+    mut query: Query<(Entity, &Children), (With<LLamaTag>, Without<Cooldown>)>,
     telegraphs: Query<With<TelegraphTag>>,
     levels: Res<Assets<LevelAsset>>,
     level: Query<&Handle<LevelAsset>>,
@@ -86,69 +86,67 @@ fn llama_stomp(
 
     let animal_behavior = level.animal_behavior.as_ref().unwrap_or_default();
 
-    query
-        .iter_mut()
-        .for_each(|(entity, _animal_state, children)| {
-            let Ok(transform) = positions.get(entity) else {
-                return;
-            };
-            let collider = Collider::ball(animal_behavior.llama_stomp_range);
-            let mut sheeps_in_range = Vec::new();
-            rapier_context.intersections_with_shape(
-                transform.translation.truncate(),
-                0.,
-                &collider,
-                QueryFilter::default().predicate(&|e| sheeps.get(e).is_ok()),
-                |e| {
-                    let Ok(sheep_transform) = positions.get(e) else {
-                        return true;
-                    };
+    query.iter_mut().for_each(|(entity, children)| {
+        let Ok(transform) = positions.get(entity) else {
+            return;
+        };
+        let collider = Collider::ball(animal_behavior.llama_stomp_range);
+        let mut sheeps_in_range = Vec::new();
+        rapier_context.intersections_with_shape(
+            transform.translation.truncate(),
+            0.,
+            &collider,
+            QueryFilter::default().predicate(&|e| sheeps.get(e).is_ok()),
+            |e| {
+                let Ok(sheep_transform) = positions.get(e) else {
+                    return true;
+                };
 
-                    let direction_to_sheep =
-                        sheep_transform.translation.truncate() - transform.translation.truncate();
+                let direction_to_sheep =
+                    sheep_transform.translation.truncate() - transform.translation.truncate();
 
-                    cmd.entity(e)
-                        .insert(Cooldown::new(Duration::from_secs_f32(0.5)))
-                        .insert(ExternalImpulse {
-                            impulse: direction_to_sheep.normalize()
-                                * animal_behavior.llama_stomp_force,
-                            ..default()
-                        });
+                cmd.entity(e)
+                    .insert(Cooldown::new(Duration::from_secs_f32(0.5)))
+                    .insert(ExternalImpulse {
+                        impulse: direction_to_sheep.normalize() * animal_behavior.llama_stomp_force,
+                        ..default()
+                    });
 
-                    sheeps_in_range.push(e);
-                    true
-                },
-            );
+                sheeps_in_range.push(e);
+                true
+            },
+        );
 
-            // *animal_state = AnimalState::Jumping;
+        // *animal_state = AnimalState::Jumping;
+        let tween = Tween::new(
+            EaseFunction::QuadraticOut,
+            Duration::from_millis(100),
+            TransformPositionLens {
+                start: Vec3::ZERO,
+                end: Vec3::new(0., 0., 5.),
+            },
+        )
+        .with_repeat_strategy(RepeatStrategy::MirroredRepeat)
+        .with_repeat_count(RepeatCount::Finite(2));
 
-            let tween = Tween::new(
-                EaseFunction::QuadraticInOut,
-                Duration::from_millis(100),
-                TransformPositionLens {
-                    start: Vec3::ZERO,
-                    end: Vec3::new(0., 0., 5.),
-                },
-            )
-            .with_repeat_strategy(RepeatStrategy::MirroredRepeat)
-            .with_repeat_count(RepeatCount::Finite(2));
+        cmd.entity(entity).insert(JumpTag);
 
-            match children
-                .iter()
-                .filter(|e| telegraphs.get(**e).is_err())
-                .next()
-            {
-                Some(child) => {
-                    cmd.entity(*child).insert(Animator::new(tween));
-                }
-                None => (),
-            };
+        match children
+            .iter()
+            .filter(|e| telegraphs.get(**e).is_err())
+            .next()
+        {
+            Some(child) => {
+                cmd.entity(*child).insert(Animator::new(tween));
+            }
+            None => (),
+        };
 
-            cmd.entity(entity)
-                .insert(Cooldown::new(Duration::from_secs_f32(
-                    animal_behavior.llama_stomp_rate + rand::random::<f32>() * 2.,
-                )));
-        });
+        cmd.entity(entity)
+            .insert(Cooldown::new(Duration::from_secs_f32(
+                animal_behavior.llama_stomp_rate + rand::random::<f32>() * 2.,
+            )));
+    });
 }
 
 fn add_telegraph_to_llama(

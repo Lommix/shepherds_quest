@@ -1,12 +1,12 @@
-use bevy::{gltf::Gltf, prelude::*};
+use bevy::{animation::RepeatAnimation, gltf::Gltf, prelude::*};
 use bevy_rapier2d::dynamics::Velocity;
 
-
+use super::llama::JumpTag;
 
 pub struct AnimalAnimationPlugin;
 impl Plugin for AnimalAnimationPlugin {
     fn build(&self, app: &mut App) {
-        app.add_systems(Update, (switch_animation, update_state));
+        app.add_systems(Update, (switch_animation, jump_once, update_state));
     }
 }
 
@@ -95,7 +95,36 @@ fn switch_animation(
     });
 }
 
-fn find_child_rec(
+fn jump_once(
+    mut cmd: Commands,
+    mut animation_player: Query<&mut AnimationPlayer>,
+    query: Query<(Entity, &Handle<Gltf>), With<JumpTag>>,
+    children: Query<&Children>,
+    _server: Res<AssetServer>,
+    gltf_assets: Res<Assets<Gltf>>,
+) {
+    query.iter().for_each(|(entity, gltf)| {
+        let Some(gltf) = gltf_assets.get(gltf) else {
+            return;
+        };
+
+        let Some(ent) = find_child_rec(entity, &children, &animation_player.to_readonly()) else {
+            return;
+        };
+
+        let mut player = animation_player.get_mut(ent).unwrap();
+
+        let Some(clip) = gltf.named_animations.get("Jump") else {
+            return;
+        };
+
+        player.start(clip.clone()).set_speed(2.);
+
+        cmd.entity(entity).remove::<JumpTag>();
+    });
+}
+
+pub fn find_child_rec(
     current: Entity,
     children_query: &Query<&Children>,
     aniplayer: &Query<&AnimationPlayer>,

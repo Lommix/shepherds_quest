@@ -19,7 +19,7 @@ impl Plugin for LevelTransitionPlugin {
             Update,
             (retry_level, next_level, level_select_button),
         );
-        app.add_systems(OnEnter(GameState::GameOver), prepare_next_level);
+        app.add_systems(OnEnter(GameState::Prepare), prepare_next_level);
     }
 }
 
@@ -37,7 +37,7 @@ fn level_select_button(
         .for_each(|(interaction, selection)| match *interaction {
             Interaction::Pressed => {
                 current_level.set(selection.0.clone());
-                state.set(GameState::GameOver);
+                state.set(GameState::Prepare);
             }
             _ => {}
         });
