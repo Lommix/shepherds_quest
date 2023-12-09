@@ -119,7 +119,6 @@ fn jump_once(
         };
 
         player.start(clip.clone()).set_speed(2.);
-
         cmd.entity(entity).remove::<JumpTag>();
     });
 }

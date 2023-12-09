@@ -13,7 +13,8 @@ use bevy_rapier2d::{
 use crate::{
     animals::{animations::AnimalState, sheep::SheepTag},
     level::Score,
-    util::LifeTime, VolumeControl,
+    util::LifeTime,
+    GameSettings,
 };
 
 use super::goal::{FAIL_GLOW, GLOW_MESH};
@@ -90,7 +91,7 @@ fn watch_trap_enter(
     rapier_context: Res<RapierContext>,
     server: Res<AssetServer>,
     death_sound: Query<With<DeathSound>>,
-    volume : Res<VolumeControl>,
+    volume: Res<GameSettings>,
 ) {
     goals.iter().for_each(|entity| {
         rapier_context
@@ -114,6 +115,8 @@ fn watch_trap_enter(
                         });
                     });
 
+                score.lost += 1;
+
                 if death_sound.iter().count() > 2 {
                     return;
                 }
@@ -128,8 +131,6 @@ fn watch_trap_enter(
                     ..default()
                 })
                 .insert(DeathSound);
-
-                score.lost += 1;
             })
     });
 }

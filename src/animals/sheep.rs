@@ -139,7 +139,7 @@ fn sheep_flocking(
                 let position = positions.get(ent).unwrap().translation.truncate();
                 let distance = position.distance(transform.translation.truncate());
 
-                if distance > animal_behavior.vision * 8. {
+                if distance > animal_behavior.vision * 4. {
                     return None;
                 }
 

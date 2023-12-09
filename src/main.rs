@@ -14,6 +14,7 @@ use bevy_embedded_assets::EmbeddedAssetPlugin;
 
 use bevy_nine_slice_ui::NineSliceUiPlugin;
 use level::Levels;
+use settings::GameSettings;
 use state::GameAssets;
 
 mod animals;
@@ -27,6 +28,7 @@ mod state;
 mod trap;
 mod ui;
 mod util;
+mod credits;
 
 fn main() {
     App::new()
@@ -52,6 +54,8 @@ fn main() {
                     }),
                     ..default()
                 }),
+            #[cfg(not(debug_assertions))]
+            bevy_egui::EguiPlugin,
             #[cfg(debug_assertions)]
             WorldInspectorPlugin::default(),
             RapierPhysicsPlugin::<()>::default(),
@@ -71,6 +75,7 @@ fn main() {
             trap::TrapPlugin,
             goal::GoalPlugin,
             ui::UiPlugin,
+            credits::CreditsPlugin,
         ))
         .add_systems(Startup, load)
         .insert_resource(RapierConfiguration {
@@ -81,26 +86,13 @@ fn main() {
             color: Color::rgb_u8(194, 229, 156),
             brightness: 0.2,
         })
-        .insert_resource(VolumeControl::default())
+        .insert_resource(GameSettings::default())
         .add_systems(Startup, background_music)
         .run();
 }
 
-#[derive(Resource)]
-pub struct VolumeControl {
-    pub music: f32,
-    pub effects: f32,
-}
-impl Default for VolumeControl {
-    fn default() -> Self {
-        Self {
-            music: 0.05,
-            effects: 0.02,
-        }
-    }
-}
 
-fn background_music(mut cmd: Commands, server: Res<AssetServer>, volume: Res<VolumeControl>) {
+fn background_music(mut cmd: Commands, server: Res<AssetServer>, volume: Res<GameSettings>) {
     cmd.spawn(AudioBundle {
         source: server.load("audio/forest.ogg"),
         settings: PlaybackSettings {

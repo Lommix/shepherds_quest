@@ -3,6 +3,7 @@ use std::time::Duration;
 use crate::{
     level::Score,
     state::{AllowedState, GameState},
+    util::VisibilityTimer,
 };
 use bevy::{
     core_pipeline::clear_color::ClearColorConfig,
@@ -32,7 +33,7 @@ impl Plugin for UiPlugin {
             Update,
             update_ui.run_if(on_timer(Duration::from_millis(100))),
         );
-        app.add_systems(Update, back_to_menu);
+        app.add_systems(Update, (back_to_menu, close_dialog));
     }
 }
 
@@ -43,28 +44,26 @@ struct PortraitRender(Handle<Image>);
 pub struct BackToMenuButton;
 
 #[derive(Component)]
+pub struct HideDialogButton;
+
+#[derive(Component)]
+pub struct DialogBoxTag;
+
+#[derive(Component)]
 pub struct Dialog;
 
 #[derive(Component)]
-struct LostText;
-
-#[derive(Component)]
-struct SavedText;
+struct LostPercent;
 
 fn update_ui(
     mut texts: Query<&mut Text>,
-    mut score: Query<Entity, With<SavedText>>,
-    mut level: Query<Entity, With<LostText>>,
+    mut level: Query<Entity, With<LostPercent>>,
     game_score: Res<Score>,
 ) {
-    score.iter_mut().for_each(|ent| {
-        let mut text = texts.get_mut(ent).unwrap();
-        text.sections[0].value = format!("Escorted: {}", game_score.saved);
-    });
-
     level.iter_mut().for_each(|ent| {
         let mut text = texts.get_mut(ent).unwrap();
-        text.sections[0].value = format!("Lost: {}", game_score.lost);
+        let percent_lost = (game_score.lost as f32) / (game_score.total as f32) * 100.;
+        text.sections[0].value = format!("Lost: {:.0} %", percent_lost);
     });
 }
 
@@ -109,60 +108,22 @@ fn spawn_ui(mut cmd: Commands, portrait: Res<PortraitRender>, server: Res<AssetS
             .with_children(|cmd| {
                 // ----------------------------------------------------------------
                 // Sheep saved Panel
-                cmd.spawn(NodeBundle {
+                cmd.spawn(TextBundle {
                     style: Style {
-                        display: Display::Flex,
-                        width: Val::Px(130.),
-                        height: Val::Px(50.),
-                        justify_content: JustifyContent::Center,
-                        align_items: AlignItems::Center,
                         margin: UiRect::all(Val::Px(5.)),
                         ..default()
                     },
+                    text: Text::from_section(
+                        "Lost 0 %",
+                        TextStyle {
+                            font_size: 20.,
+                            color: Color::WHITE,
+                            ..default()
+                        },
+                    ),
                     ..default()
                 })
-                .with_children(|cmd| {
-                    cmd.spawn(TextBundle {
-                        text: Text::from_section(
-                            "Saved 0",
-                            TextStyle {
-                                font_size: 20.,
-                                color: Color::WHITE,
-                                ..default()
-                            },
-                        ),
-                        ..default()
-                    })
-                    .insert(SavedText);
-                });
-                // ----------------------------------------------------------------
-                // Sheep lost Panel
-                cmd.spawn(NodeBundle {
-                    style: Style {
-                        display: Display::Flex,
-                        width: Val::Px(130.),
-                        height: Val::Px(50.),
-                        justify_content: JustifyContent::Center,
-                        align_items: AlignItems::Center,
-                        margin: UiRect::all(Val::Px(5.)),
-                        ..default()
-                    },
-                    ..default()
-                })
-                .with_children(|cmd| {
-                    cmd.spawn(TextBundle {
-                        text: Text::from_section(
-                            "Lost 0",
-                            TextStyle {
-                                font_size: 20.,
-                                color: Color::WHITE,
-                                ..default()
-                            },
-                        ),
-                        ..default()
-                    })
-                    .insert(LostText);
-                });
+                .insert(LostPercent);
             });
         });
 
@@ -179,6 +140,35 @@ fn spawn_ui(mut cmd: Commands, portrait: Res<PortraitRender>, server: Res<AssetS
             ..default()
         })
         .with_children(|cmd| {
+            //back to menu
+            cmd.spawn(ButtonBundle {
+                style: Style {
+                    position_type: PositionType::Absolute,
+                    right: Val::Px(10.),
+                    bottom: Val::Percent(2.),
+                    padding: UiRect::all(Val::Px(10.)),
+                    ..default()
+                },
+                ..default()
+            })
+            .insert(BackToMenuButton)
+            .insert(NineSliceUiTexture::from_slice(
+                server.load("sprites/ui.png"),
+                Rect::new(48., 0., 96., 48.),
+            ))
+            .with_children(|cmd| {
+                cmd.spawn(TextBundle {
+                    text: Text::from_section(
+                        "Back to Menu",
+                        TextStyle {
+                            font_size: 16.,
+                            color: Color::WHITE,
+                            ..default()
+                        },
+                    ),
+                    ..default()
+                });
+            });
             cmd.spawn(NineSliceUiMaterialBundle {
                 style: Style {
                     display: Display::Flex,
@@ -202,6 +192,8 @@ fn spawn_ui(mut cmd: Commands, portrait: Res<PortraitRender>, server: Res<AssetS
                 ),
                 ..default()
             })
+            .insert(DialogBoxTag)
+            .insert(VisibilityTimer::new(Duration::from_secs(20)))
             .with_children(|cmd| {
                 //portrait
                 cmd.spawn(ImageBundle {
@@ -228,7 +220,7 @@ fn spawn_ui(mut cmd: Commands, portrait: Res<PortraitRender>, server: Res<AssetS
                     },
                     ..default()
                 })
-                .insert(BackToMenuButton)
+                .insert(HideDialogButton)
                 .insert(NineSliceUiTexture::from_slice(
                     server.load("sprites/ui.png"),
                     Rect::new(48., 0., 96., 48.),
@@ -236,7 +228,7 @@ fn spawn_ui(mut cmd: Commands, portrait: Res<PortraitRender>, server: Res<AssetS
                 .with_children(|cmd| {
                     cmd.spawn(TextBundle {
                         text: Text::from_section(
-                            "Back to Menu",
+                            "Ok",
                             TextStyle {
                                 font_size: 24.,
                                 color: Color::WHITE,
@@ -246,13 +238,12 @@ fn spawn_ui(mut cmd: Commands, portrait: Res<PortraitRender>, server: Res<AssetS
                         ..default()
                     });
                 });
-
                 //dialog
                 cmd.spawn(TextBundle {
                     text: Text::from_section(
                         "Dialog",
                         TextStyle {
-                            font_size: 24.,
+                            font_size: 20.,
                             color: Color::WHITE,
                             ..default()
                         },
@@ -272,6 +263,20 @@ fn spawn_ui(mut cmd: Commands, portrait: Res<PortraitRender>, server: Res<AssetS
                 .insert(Dialog);
             });
         });
+    });
+}
+
+fn close_dialog(
+    buttons: Query<&Interaction, (Changed<Interaction>, With<HideDialogButton>)>,
+    mut dialog: Query<&mut Visibility, With<DialogBoxTag>>,
+) {
+    buttons.iter().for_each(|interaction| match *interaction {
+        Interaction::Pressed => {
+            dialog.iter_mut().for_each(|mut visibility| {
+                *visibility = Visibility::Hidden;
+            });
+        }
+        _ => {}
     });
 }
 

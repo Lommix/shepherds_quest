@@ -4,9 +4,6 @@ version = "0.1.0"
 edition = "2021"
 authors = ["Lorenz Mielke"]
 
-[toolchain]
-channel = "nightly"
-
 [profile.dev.package."*"]
 opt-level = 2
 

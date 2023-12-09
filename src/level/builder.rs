@@ -68,6 +68,7 @@ fn load_level(
     mut materials: ResMut<Assets<StandardMaterial>>,
     mut meshes: ResMut<Assets<Mesh>>,
     mut dialog: Query<&mut Text, With<Dialog>>,
+    mut score: ResMut<Score>,
     server: Res<AssetServer>,
 ) {
     query.iter().for_each(|(entity, handle)| {
@@ -126,7 +127,7 @@ fn load_level(
 
         // -----------------------------------------------------------------------
         // Build Layout
-
+        let mut sheep_spawn_count = 0;
         cmd.entity(entity).with_children(|cmd| {
             data.iter().for_each(|(pos, tile)| match tile {
                 Tiles::Empty | Tiles::Sheep | Tiles::Dog | Tiles::Llama => {
@@ -158,10 +159,9 @@ fn load_level(
                     }
 
                     if matches!(tile, Tiles::Sheep) {
-
+                        sheep_spawn_count += 1;
                         let mut out = Vec::new();
                         circle_formation(2., 2., level.sheeps_per_spawn, &mut out);
-
                         (0..level.sheeps_per_spawn).zip(out.iter()).for_each(|( _, offset )| {
                             let transform = Transform::from_translation(pos.extend(0.) + *offset);
                             cmd.spawn(SheepBundle {
@@ -268,10 +268,11 @@ fn load_level(
         .insert(Name::new("Ground"));
 
         cmd.entity(entity).insert(LevelLoaded);
-        dialog.sections[0].value = level.intro.clone();
+        dialog.sections[0].value = format!("{} There are {} sheep",level.intro.clone(), sheep_spawn_count * level.sheeps_per_spawn);
+        score.total = sheep_spawn_count * level.sheeps_per_spawn;
 
         let level_size = level.size.unwrap() + Vec2::splat(TILE_SIZE);
-        for i in 0..50 {
+        for _ in 0..50 {
             let padding: f32 = 50.; // e.g., 20.0
             let mut rng = rand::thread_rng();
 

@@ -9,13 +9,6 @@ pub mod transistion;
 
 pub const TILE_SIZE: f32 = 8.;
 
-pub const CAMPAIGN_LEVELS: [&str; 1] = [
-    "levels/1.level.ron",
-    // "levels/2.level.ron",
-    // "levels/3.level.ron",
-    // "levels/4.level.ron",
-];
-
 pub struct LevelPlugin;
 impl Plugin for LevelPlugin {
     fn build(&self, app: &mut App) {
@@ -66,6 +59,17 @@ impl Levels {
             Current::Campaign(id) => id >= self.levels.len() - 1,
             Current::Custom(_) => true,
         }
+    }
+
+    pub fn is_last(&self) -> bool {
+        match self.current {
+            Current::Campaign(id) => id >= self.levels.len() - 1,
+            Current::Custom(_) => false,
+        }
+    }
+
+    pub fn first(&self) -> Handle<LevelAsset> {
+        self.levels[0].clone()
     }
 
     pub fn next(&self) -> Option<Handle<LevelAsset>> {
@@ -165,17 +169,14 @@ impl Default for LevelBundle {
 pub struct Score {
     pub lost: usize,
     pub saved: usize,
+    pub total : usize,
 }
 
 impl Score {
     pub fn reset(&mut self) {
         self.lost = 0;
         self.saved = 0;
-    }
-
-    fn reset_score(mut score: ResMut<Score>) {
-        score.lost = 0;
-        score.saved = 0;
+        self.total = 0;
     }
 }
 

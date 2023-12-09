@@ -4,7 +4,7 @@ use crate::{
     level::{
         builder::LoadLevelEvent,
         loader::{LevelAsset, LevelAssetLoader},
-        Levels, CAMPAIGN_LEVELS,
+        Levels,
     },
     state::{AllowedState, GameState},
 };
@@ -150,7 +150,12 @@ fn hover_effect(mut query: Query<(Entity, &Interaction, &mut NineSliceUiTexture)
             _ => {}
         })
 }
-fn spawn_menu(mut cmd: Commands, server: Res<AssetServer>, mut images: ResMut<Assets<Image>>) {
+fn spawn_menu(
+    mut cmd: Commands,
+    server: Res<AssetServer>,
+    mut images: ResMut<Assets<Image>>,
+    levels: Res<Levels>,
+) {
     let size = Extent3d {
         width: 200,
         height: 200,
@@ -277,7 +282,7 @@ fn spawn_menu(mut cmd: Commands, server: Res<AssetServer>, mut images: ResMut<As
                 },
                 ..default()
             })
-            .insert(LevelSelectorButton(server.load(CAMPAIGN_LEVELS[0])))
+            .insert(LevelSelectorButton(levels.first()))
             .insert(NineSliceUiTexture::from_slice(
                 server.load("sprites/ui.png"),
                 Rect::new(48., 0., 96., 48.),

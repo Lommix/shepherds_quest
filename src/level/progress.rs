@@ -55,13 +55,13 @@ fn check_progress(
 
     if percent > level.win_percent.clamp(0., 100.) {
         dialog.sections[0].value = format!(
-            "{}. You escorted {:.0} % of the sheeps to safty!",
+            "{} You escorted {:.0} % of the sheeps to safty!",
             level.win, percent
         );
         win.send(LevelWon);
     } else {
         dialog.sections[0].value = format!(
-            "{}. You only escorted {:.0} % of the sheeps to safty! Try again!",
+            "{} You only escorted {:.0} % of the sheeps to safty! Try again!",
             level.loose, percent
         );
         loose.send(LevelLost);

@@ -7,7 +7,7 @@ use bevy::{
 use crate::{
     animals::{dog::DogTag, physics::MoveTo},
     camera::MainCamera,
-    VolumeControl,
+    GameSettings,
 };
 
 pub struct ControlPlugin;
@@ -92,7 +92,7 @@ fn command_dog(
     mut click_events: EventReader<MapClickEvent>,
     dog_sounds: Query<With<DogSound>>,
     server: Res<AssetServer>,
-    volume: Res<VolumeControl>,
+    volume: Res<GameSettings>,
 ) {
     click_events.read().for_each(|event| {
         dogs.iter_mut().for_each(|(ent, move_to)| {

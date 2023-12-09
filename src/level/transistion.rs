@@ -4,6 +4,7 @@ use bevy_nine_slice_ui::NineSliceUiTexture;
 use crate::{
     menu::LevelSelectorButton,
     state::{AllowedState, GameState},
+    ui::DialogBoxTag,
 };
 
 use super::{
@@ -15,10 +16,7 @@ use super::{
 pub struct LevelTransitionPlugin;
 impl Plugin for LevelTransitionPlugin {
     fn build(&self, app: &mut App) {
-        app.add_systems(
-            Update,
-            (retry_level, next_level, level_select_button),
-        );
+        app.add_systems(Update, (retry_level, next_level, level_select_button));
         app.add_systems(OnEnter(GameState::Prepare), prepare_next_level);
     }
 }
@@ -43,10 +41,10 @@ fn level_select_button(
         });
 }
 
-
 fn retry_level(
     mut event: EventReader<LevelLost>,
     mut cmd: Commands,
+    mut dialog_box: Query<&mut Visibility, With<DialogBoxTag>>,
     current_level: Res<Levels>,
     server: Res<AssetServer>,
 ) {
@@ -67,11 +65,17 @@ fn retry_level(
     .with_children(|cmd| {
         spawn_progress_button("retry", current_level.current(), cmd, &server);
     });
+
+    dialog_box.iter_mut().for_each(|mut vis| {
+        *vis = Visibility::Visible;
+    });
 }
 
 fn next_level(
     mut event: EventReader<LevelWon>,
     mut cmd: Commands,
+    mut state: ResMut<NextState<GameState>>,
+    mut dialog_box: Query<&mut Visibility, With<DialogBoxTag>>,
     levels: Res<Levels>,
     server: Res<AssetServer>,
 ) {
@@ -95,7 +99,17 @@ fn next_level(
         if let Some(next) = levels.next() {
             spawn_progress_button("Next Level", next, builder, &server);
         }
+
+        if levels.is_last() {
+            state.set(GameState::Credits);
+            return;
+        }
+
         spawn_progress_button("Retry", levels.current(), builder, &server);
+    });
+
+    dialog_box.iter_mut().for_each(|mut vis| {
+        *vis = Visibility::Visible;
     });
 }
 

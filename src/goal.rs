@@ -14,7 +14,7 @@ use crate::{
     animals::{animations::AnimalState, sheep::SheepTag},
     level::Score,
     util::LifeTime,
-    VolumeControl,
+    GameSettings,
 };
 
 pub const SUCCESS_GLOW: Handle<StandardMaterial> = Handle::weak_from_u128(12561396483470153565671);
@@ -98,7 +98,7 @@ fn watch_goal_enter(
     rapier_context: Res<RapierContext>,
     server: Res<AssetServer>,
     sheep_sound: Query<With<GoalSound>>,
-    volume: Res<VolumeControl>,
+    volume: Res<GameSettings>,
 ) {
     goals.iter().for_each(|entity| {
         rapier_context
@@ -122,6 +122,8 @@ fn watch_goal_enter(
                         });
                     });
 
+                score.saved += 1;
+
                 if sheep_sound.iter().count() > 2 {
                     return;
                 }
@@ -137,7 +139,6 @@ fn watch_goal_enter(
                 })
                 .insert(GoalSound);
 
-                score.saved += 1;
             })
     });
 }
