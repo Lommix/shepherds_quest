@@ -4,7 +4,7 @@
     win: "Good boy! Let's rob the next farm!",
     loose: "Bad boy! You messed up! Do a better job or I'll have to find another dog!",
     sheeps_per_spawn: 80,
-    win_percent: 50,
+    win_percent: 70,
     animal_behavior: Some(
         (
             alignment: 0.8,

@@ -48,7 +48,7 @@ fn check_progress(
     let lost_percent = ( score.lost as f32 / score.total_sheep as f32 ) * 100.;
     let saved_percent = ( score.saved as f32 / score.total_sheep as f32 ) * 100.;
 
-    if saved_percent > level.win_percent.clamp(0., 100.) {
+    if saved_percent >= level.win_percent.clamp(0., 100.) {
         dialog.sections[0].value = format!(
             "{} You escorted over {:.0} % of the sheeps to safty!",
             level.win, saved_percent
@@ -57,7 +57,7 @@ fn check_progress(
         cmd.entity(entity).insert(LevelOver);
     }
 
-    if lost_percent > 100. - level.win_percent.clamp(0., 100.){
+    if lost_percent >= 100. - level.win_percent.clamp(0., 100.) && level.win_percent < 100. {
         dialog.sections[0].value = format!(
             "{} You lost more than {:.0} % of the sheeps! Try again!",
             level.loose, lost_percent

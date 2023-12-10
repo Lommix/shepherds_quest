@@ -162,16 +162,19 @@ fn load_level(
                         sheep_spawn_count += 1;
                         let mut out = Vec::new();
                         circle_formation(2., 2., level.sheeps_per_spawn, &mut out);
-                        (0..level.sheeps_per_spawn).zip(out.iter()).for_each(|( _, offset )| {
-                            let transform = Transform::from_translation(pos.extend(0.) + *offset);
-                            cmd.spawn(SheepBundle {
-                                scene: server.load("models/sheep.glb#Scene0"),
-                                gltf: server.load("models/sheep.glb"),
-                                transform,
-                                ..default()
+                        (0..level.sheeps_per_spawn)
+                            .zip(out.iter())
+                            .for_each(|(_, offset)| {
+                                let transform =
+                                    Transform::from_translation(pos.extend(0.) + *offset);
+                                cmd.spawn(SheepBundle {
+                                    scene: server.load("models/sheep.glb#Scene0"),
+                                    gltf: server.load("models/sheep.glb"),
+                                    transform,
+                                    ..default()
+                                });
+                                // .insert(MoveTo::new(*pos));
                             });
-                            // .insert(MoveTo::new(*pos));
-                        });
                     }
                 }
                 Tiles::Wall => {
@@ -268,7 +271,12 @@ fn load_level(
         .insert(Name::new("Ground"));
 
         cmd.entity(entity).insert(LevelLoaded);
-        dialog.sections[0].value = format!("{} There are {} sheep",level.intro.clone(), sheep_spawn_count * level.sheeps_per_spawn);
+        dialog.sections[0].value = format!(
+            "{} There are {} sheep. Escort at least {} % of the sheep.",
+            level.intro.clone(),
+            sheep_spawn_count * level.sheeps_per_spawn,
+            level.win_percent
+        );
         score.total_sheep = sheep_spawn_count * level.sheeps_per_spawn;
 
         let level_size = level.size.unwrap() + Vec2::splat(TILE_SIZE);
