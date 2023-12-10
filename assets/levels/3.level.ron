@@ -3,7 +3,7 @@
     intro: "Shepherd Bob: This farm owns Llamas. They taste terrible and hate sheep. Why would anyone keep them around? Get the sheep to the ship! At least 50% of them, I don't care about the Llamas.",
     win: "Good boy! Let's rob the next farm!",
     loose: "Bad boy! You messed up! Do a better job or I'll have to find another dog!",
-    sheeps_per_spawn: 300,
+    sheeps_per_spawn: 200,
     win_percent: 50,
     animal_behavior: Some(
         (

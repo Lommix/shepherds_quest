@@ -1,4 +1,4 @@
-use bevy::{animation::RepeatAnimation, gltf::Gltf, prelude::*};
+use bevy::{gltf::Gltf, prelude::*};
 use bevy_rapier2d::dynamics::Velocity;
 
 use super::llama::JumpTag;

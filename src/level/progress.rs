@@ -1,6 +1,6 @@
 use bevy::prelude::*;
 
-use crate::{animals::sheep::SheepTag, state::GameState, ui::Dialog};
+use crate::{state::GameState, ui::Dialog};
 
 use super::{loader::LevelAsset, LevelLoaded, Score};
 

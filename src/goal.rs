@@ -84,7 +84,7 @@ impl Default for GoalBundle {
             global_transform: GlobalTransform::default(),
             name: Name::new("goal"),
             goal: GoalTag,
-            sensor: Sensor::default(),
+            sensor: Sensor,
             collider: Collider::default(),
         }
     }

@@ -119,7 +119,7 @@ fn load_custom_level(
                     .pick_file();
 
                 let sender = state.channel.0.clone();
-                let file_handle = AsyncComputeTaskPool::get()
+                AsyncComputeTaskPool::get()
                     .spawn(async move {
                         let dialog = AsyncFileDialog::new()
                             .set_title("Load a custom Level form a .ron file")
@@ -290,7 +290,7 @@ fn spawn_menu(
             .with_children(|cmd| {
                 cmd.spawn(TextBundle {
                     text: Text::from_section(
-                        "Campaign",
+                        "Start Game",
                         TextStyle {
                             font_size: 20.,
                             color: Color::WHITE,
@@ -338,9 +338,9 @@ fn spawn_menu(
                             ..default()
                         },
                 text: Text::from_section(
-                    "Click to run, Mouswheel to zoom\nbuild your own levels and share them!",
+                    "Right click to run, Mouswheel to zoom.\nBuild your own levels and share them! Link in the description",
                     TextStyle {
-                        font_size: 20.,
+                        font_size: 16.,
                         color: Color::WHITE,
                         ..default()
                     },

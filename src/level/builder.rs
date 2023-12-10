@@ -1,7 +1,7 @@
 use std::time::Duration;
 
 use bevy::prelude::*;
-use bevy_aseprite::AsepriteSliceBundle;
+
 use bevy_rapier2d::{dynamics::RigidBody, geometry::Collider};
 use bevy_tweening::{
     lens::TransformPositionLens, Animator, EaseFunction, RepeatCount, RepeatStrategy, Tween,
@@ -9,7 +9,7 @@ use bevy_tweening::{
 use rand::Rng;
 
 use crate::{
-    animals::{dog::DogBundle, llama::LLamaBundle, physics::MoveTo, sheep::SheepBundle},
+    animals::{dog::DogBundle, llama::LLamaBundle, sheep::SheepBundle},
     goal::GoalBundle,
     level::{LevelBundle, TILE_SIZE},
     state::GameState,
@@ -304,7 +304,7 @@ fn load_level(
 
             cmd.spawn(SceneBundle {
                 scene: server.load("models/tree.glb#Scene0"),
-                transform: Transform::from_translation(Vec3::new(x as f32, y as f32, 0.)),
+                transform: Transform::from_translation(Vec3::new(x, y, 0.)),
                 ..default()
             });
         }

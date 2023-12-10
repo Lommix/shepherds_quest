@@ -57,7 +57,7 @@ impl Default for TrapBundle {
             view_visibility: ViewVisibility::default(),
             transform: Transform::default(),
             global_transform: GlobalTransform::default(),
-            sensor: Sensor::default(),
+            sensor: Sensor,
             collider: Collider::default(),
             name: Name::new("trap"),
         }

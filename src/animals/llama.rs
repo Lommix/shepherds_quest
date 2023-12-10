@@ -132,9 +132,7 @@ fn llama_stomp(
         cmd.entity(entity).insert(JumpTag);
 
         match children
-            .iter()
-            .filter(|e| telegraphs.get(**e).is_err())
-            .next()
+            .iter().find(|e| telegraphs.get(**e).is_err())
         {
             Some(child) => {
                 cmd.entity(*child).insert(Animator::new(tween));

@@ -201,7 +201,6 @@ fn spawn_ui(mut cmd: Commands, portrait: Res<PortraitRender>, server: Res<AssetS
                 ..default()
             })
             .insert(DialogBoxTag)
-            .insert(VisibilityTimer::new(Duration::from_secs(20)))
             .with_children(|cmd| {
                 //portrait
                 cmd.spawn(ImageBundle {
