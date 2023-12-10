@@ -16,10 +16,11 @@ Everything else is made by myself (Yes even the bark sound). The Sheep sounds we
 
 # Make your own levels
 
-In the game menu you can load a level from file. The file format is ron. You can tweak most values and create absurd levels.
-Here is an example:
+In the game menu you can load a level from file. The file format is ron (has to end on `<anything>.level.ron`). You can tweak most values and create absurd levels.
+Here is an example from the game:
 
 ```ron
+// level_4.level.ron
 (
     name: "Pug in training",
     intro: "Shepherd Bob: This is your last test, Henk. I gave you super treats. You are faster now! Get 50% of the sheeps to the ship!",
