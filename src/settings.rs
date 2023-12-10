@@ -1,13 +1,18 @@
-use bevy::prelude::*;
+use bevy::{
+    audio::{Volume, VolumeLevel},
+    prelude::*,
+};
 use bevy_egui::{
     egui::{self, Align2},
     EguiContexts,
 };
 
+use crate::BackgroundMusic;
+
 pub struct SettingsPlugin;
 impl Plugin for SettingsPlugin {
     fn build(&self, app: &mut App) {
-        app.add_systems(Update, settings);
+        app.add_systems(Update, (settings, adjust_background_music));
     }
 }
 
@@ -22,6 +27,9 @@ impl Default for GameSettings {
         Self {
             music: 0.05,
             effects: 0.02,
+            #[cfg(target_arch = "wasm32")]
+            shadows: false,
+            #[cfg(not(target_arch = "wasm32"))]
             shadows: true,
         }
     }
@@ -43,5 +51,14 @@ fn settings(
 
     query.iter_mut().for_each(|mut light| {
         light.shadows_enabled = settings.shadows;
+    });
+}
+
+fn adjust_background_music(
+    query: Query<&AudioSink, With<BackgroundMusic>>,
+    game_settings: Res<GameSettings>,
+) {
+    query.iter().for_each(|settings| {
+        settings.set_volume(game_settings.music);
     });
 }

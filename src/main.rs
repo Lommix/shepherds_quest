@@ -20,6 +20,7 @@ use state::GameAssets;
 mod animals;
 mod camera;
 mod controls;
+mod credits;
 mod goal;
 mod level;
 mod menu;
@@ -28,7 +29,6 @@ mod state;
 mod trap;
 mod ui;
 mod util;
-mod credits;
 
 fn main() {
     App::new()
@@ -49,7 +49,7 @@ fn main() {
                 .set(WindowPlugin {
                     primary_window: Some(Window {
                         title: "Bevy App".to_string(),
-                        resolution: WindowResolution::new(1400., 900.),
+                        resolution: WindowResolution::new(1280., 720.),
                         ..default()
                     }),
                     ..default()
@@ -91,6 +91,8 @@ fn main() {
         .run();
 }
 
+#[derive(Component)]
+pub struct BackgroundMusic;
 
 fn background_music(mut cmd: Commands, server: Res<AssetServer>, volume: Res<GameSettings>) {
     cmd.spawn(AudioBundle {
@@ -100,7 +102,8 @@ fn background_music(mut cmd: Commands, server: Res<AssetServer>, volume: Res<Gam
             volume: Volume::Absolute(VolumeLevel::new(volume.music)),
             ..default()
         },
-    });
+    })
+    .insert(BackgroundMusic);
 }
 
 fn load(mut cmd: Commands, mut game_assets: ResMut<GameAssets>, server: Res<AssetServer>) {

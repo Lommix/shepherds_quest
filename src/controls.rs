@@ -1,6 +1,6 @@
 use bevy::{
     audio::{PlaybackMode, Volume, VolumeLevel},
-    input::mouse::MouseButtonInput,
+    input::{mouse::MouseButtonInput, touch::TouchPhase},
     prelude::*,
 };
 
@@ -14,6 +14,7 @@ pub struct ControlPlugin;
 impl Plugin for ControlPlugin {
     fn build(&self, app: &mut App) {
         app.add_event::<MapClickEvent>();
+        app.add_systems(Update, touch_event.run_if(on_event::<TouchInput>()));
         app.add_systems(Update, click_event.run_if(on_event::<MouseButtonInput>()));
         app.add_systems(Update, command_dog.run_if(on_event::<MapClickEvent>()));
     }
@@ -31,6 +32,33 @@ impl MapClickEvent {
     pub fn button(&self) -> MouseButton {
         self.button
     }
+}
+
+fn touch_event(
+    mut touch_event: EventReader<TouchInput>,
+    mut events: EventWriter<MapClickEvent>,
+    camera: Query<(&Camera, &GlobalTransform), With<MainCamera>>,
+) {
+    let Ok((cam, cam_trans)) = camera.get_single() else {
+        return;
+    };
+
+    touch_event.read().for_each(|event| {
+        if event.phase != TouchPhase::Started {
+            return;
+        }
+
+        let Some(ray) = cam.viewport_to_world(cam_trans, event.position) else {
+            return;
+        };
+
+        if let Some(pos) = intersect_ray_with_z_zero(ray.origin, ray.direction) {
+            events.send(MapClickEvent {
+                translation: pos,
+                button: MouseButton::Right,
+            });
+        }
+    });
 }
 
 fn click_event(

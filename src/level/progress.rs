@@ -50,7 +50,7 @@ fn check_progress(
 
     if saved_percent >= level.win_percent.clamp(0., 100.) {
         dialog.sections[0].value = format!(
-            "{} You escorted over {:.0} % of the sheeps to safty!",
+            "{} You escorted {:.0} % of the sheep to safty!",
             level.win, saved_percent
         );
         win.send(LevelWon);
@@ -59,7 +59,7 @@ fn check_progress(
 
     if lost_percent >= 100. - level.win_percent.clamp(0., 100.) && level.win_percent < 100. {
         dialog.sections[0].value = format!(
-            "{} You lost more than {:.0} % of the sheeps! Try again!",
+            "{} You lost {:.0} % of the sheep! Try again!",
             level.loose, lost_percent
         );
         loose.send(LevelLost);
