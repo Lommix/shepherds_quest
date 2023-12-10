@@ -3,6 +3,7 @@ use std::time::Duration;
 use bevy::{
     audio::{PlaybackMode, Volume, VolumeLevel},
     prelude::*,
+    utils::HashSet,
 };
 use bevy_rapier2d::{
     dynamics::Velocity,
@@ -100,6 +101,7 @@ fn watch_goal_enter(
     sheep_sound: Query<With<GoalSound>>,
     volume: Res<GameSettings>,
 ) {
+    let mut escorted_sheep = HashSet::new();
     goals.iter().for_each(|entity| {
         rapier_context
             .intersections_with(entity)
@@ -122,8 +124,7 @@ fn watch_goal_enter(
                         });
                     });
 
-                score.saved += 1;
-
+                escorted_sheep.insert(sheep_ent);
                 if sheep_sound.iter().count() > 2 {
                     return;
                 }
@@ -138,7 +139,7 @@ fn watch_goal_enter(
                     ..default()
                 })
                 .insert(GoalSound);
-
             })
     });
+    score.saved += escorted_sheep.len();
 }

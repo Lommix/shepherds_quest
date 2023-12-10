@@ -2,7 +2,7 @@ use std::time::Duration;
 
 use bevy::{
     audio::{PlaybackMode, Volume, VolumeLevel},
-    prelude::*,
+    prelude::*, utils::HashSet,
 };
 use bevy_rapier2d::{
     dynamics::Velocity,
@@ -93,6 +93,7 @@ fn watch_trap_enter(
     death_sound: Query<With<DeathSound>>,
     volume: Res<GameSettings>,
 ) {
+    let mut dying_sheeps = HashSet::new();
     goals.iter().for_each(|entity| {
         rapier_context
             .intersections_with(entity)
@@ -102,6 +103,8 @@ fn watch_trap_enter(
                     return;
                 }
 
+
+                dying_sheeps.insert(sheep_ent);
                 cmd.entity(sheep_ent)
                     .insert(LifeTime::new(Duration::from_millis(500)))
                     .insert(AnimalState::Dead)
@@ -114,8 +117,6 @@ fn watch_trap_enter(
                             ..default()
                         });
                     });
-
-                score.lost += 1;
 
                 if death_sound.iter().count() > 2 {
                     return;
@@ -133,4 +134,5 @@ fn watch_trap_enter(
                 .insert(DeathSound);
             })
     });
+    score.lost += dying_sheeps.len();
 }

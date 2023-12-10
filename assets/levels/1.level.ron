@@ -3,7 +3,7 @@
     intro: "Shepherd Bob: Henk, I see you've finally made it to my side! As you know, I am Bob, the shepherd. But let's get down to business - these stupid sheep won't board the ship... Ehhm I mean stables. Can you help me find a way to make them cooperate?",
     win: "Good boy! You did it! Let's take \"care\" of the next farm ...",
     loose: "Bad boy! No treats for you! Let's try again ...",
-    sheeps_per_spawn: 20,
+    sheeps_per_spawn: 80,
     win_percent: 0,
     animal_behavior: Some(
         (
@@ -25,14 +25,14 @@
 #####------##-----------------------#
 #####------##-----------------------#
 #GG--------##-----------------------#
+#GG--------##--------##------S------#
 #GG--------##--------##-------------#
-#GGS-------##--------##-------------#
 #GG--------##--------##-------------#
 #GG--------##--------##-------------#
 #GG--------##--------##------D------#
 #GG--------##--------##-------------#
 #GG------------------##-------------#
-#GG------------------##-------------#
+#GG------------------##------S------#
 #####----------------##-------------#
 #####----------------##-------------#
 #####################################",

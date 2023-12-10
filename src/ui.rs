@@ -56,21 +56,22 @@ pub struct DialogBoxTag;
 pub struct Dialog;
 
 #[derive(Component)]
-struct LostPercent;
+struct ScoreText;
 
 fn update_ui(
     mut texts: Query<&mut Text>,
-    mut level: Query<Entity, With<LostPercent>>,
+    mut level: Query<Entity, With<ScoreText>>,
     game_score: Res<Score>,
 ) {
     level.iter_mut().for_each(|ent| {
-        let mut text = texts.get_mut(ent).unwrap();
+        let Ok(mut text) = texts.get_mut(ent) else {
+            return;
+        };
 
         let percent_lost = game_score.lost as f32 / game_score.total_sheep as f32;
+        let percent_saved = game_score.saved as f32 / game_score.total_sheep as f32;
 
-        info!("Updating lost percent {}, lost {}, total {}", percent_lost, game_score.lost, game_score.total_sheep);
-
-        text.sections[0].value = format!("Lost: {} %", percent_lost * 100.);
+        text.sections[0].value = format!("Lost: {:.0} %  Escorted {:.0} %", percent_lost * 100., percent_saved * 100.);
     });
 }
 
@@ -130,7 +131,7 @@ fn spawn_ui(mut cmd: Commands, portrait: Res<PortraitRender>, server: Res<AssetS
                     ),
                     ..default()
                 })
-                .insert(LostPercent);
+                .insert(ScoreText);
             });
         });
 

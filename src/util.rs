@@ -49,7 +49,7 @@ fn lifetime_system(mut cmd: Commands, mut life_q: Query<(Entity, &mut LifeTime)>
 }
 
 fn visibility_timer_system(
-    _cmd: Commands,
+    mut cmd: Commands,
     mut visibility_q: Query<(Entity, &mut Visibility, &mut VisibilityTimer)>,
     time: Res<Time>,
 ) {
@@ -63,6 +63,7 @@ fn visibility_timer_system(
                     timer.0.finished().then(|| {
                         *visibilty = Visibility::Hidden;
                     });
+                    cmd.entity(_ent).remove::<VisibilityTimer>();
                 }
                 false => {
                     timer.0.finished().then(|| {
