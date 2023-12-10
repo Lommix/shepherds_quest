@@ -25,7 +25,6 @@ pub struct LevelLost;
 fn check_progress(
     score: Res<Score>,
     level: Query<(Entity, &Handle<LevelAsset>), (With<LevelLoaded>, Without<LevelOver>)>,
-    sheeps: Query<With<SheepTag>>,
     levels: Res<Assets<LevelAsset>>,
     mut cmd: Commands,
     mut dialog: Query<&mut Text, With<Dialog>>,
@@ -33,9 +32,6 @@ fn check_progress(
     mut win: EventWriter<LevelWon>,
     mut loose: EventWriter<LevelLost>,
 ) {
-    if sheeps.iter().count() > 0 {
-        return;
-    }
 
     let Ok(mut dialog) = dialog.get_single_mut() else {
         return;
@@ -49,23 +45,28 @@ fn check_progress(
         return;
     };
 
-    //calculate score
-    let total = score.lost + score.saved;
-    let percent = score.saved as f32 / total as f32 * 100.;
 
-    if percent > level.win_percent.clamp(0., 100.) {
+    let lost_percent = ( score.lost as f32 / score.total_sheep as f32 ) * 100.;
+    let saved_percent = ( score.saved as f32 / score.total_sheep as f32 ) * 100.;
+
+    // info!("Checking progress lost {}, saved {}, total {}", score.lost, score.saved, score.total_sheep);
+
+    if saved_percent > level.win_percent.clamp(0., 100.) {
         dialog.sections[0].value = format!(
             "{} You escorted {:.0} % of the sheeps to safty!",
-            level.win, percent
+            level.win, saved_percent
         );
         win.send(LevelWon);
-    } else {
-        dialog.sections[0].value = format!(
-            "{} You only escorted {:.0} % of the sheeps to safty! Try again!",
-            level.loose, percent
-        );
-        loose.send(LevelLost);
+        cmd.entity(entity).insert(LevelOver);
     }
 
-    cmd.entity(entity).insert(LevelOver);
+    if lost_percent > 100. - level.win_percent.clamp(0., 100.){
+        dialog.sections[0].value = format!(
+            "{} You los {:.0} % of the sheeps! Try again!",
+            level.loose, lost_percent
+        );
+        loose.send(LevelLost);
+        cmd.entity(entity).insert(LevelOver);
+    }
+
 }

@@ -100,44 +100,6 @@ impl Levels {
 #[derive(Component)]
 pub struct LevelLoaded;
 
-// #[derive(Resource, Default)]
-// pub struct CurrentLevel {
-//     campaign_level: Option<usize>,
-//     pub handle: Handle<LevelAsset>,
-// }
-//
-// impl CurrentLevel {
-//     pub fn is_custom(&self) -> bool {
-//         self.campaign_level.is_none()
-//     }
-//
-//     pub fn current(&self) -> Handle<LevelAsset> {
-//         self.handle.clone()
-//     }
-//
-//     pub fn set(&mut self, handle: Handle<LevelAsset>) {
-//         self.handle = handle;
-//     }
-//
-//     pub fn last_campaign_level(&self) -> bool {
-//         self.campaign_level.is_some() && self.campaign_level.unwrap() >= CAMPAIGN_LEVELS.len() - 1
-//     }
-//
-//     pub fn next_campaign_level(&mut self) -> Option<usize> {
-//         match self.campaign_level {
-//             Some(id) => {
-//                 if id < CAMPAIGN_LEVELS.len() - 1 {
-//                     self.campaign_level = Some(id + 1);
-//                     Some(id + 1)
-//                 } else {
-//                     None
-//                 }
-//             }
-//             None => None,
-//         }
-//     }
-// }
-
 #[derive(Bundle)]
 pub struct LevelBundle {
     pub level: Handle<LevelAsset>,
@@ -169,14 +131,14 @@ impl Default for LevelBundle {
 pub struct Score {
     pub lost: usize,
     pub saved: usize,
-    pub total : usize,
+    pub total_sheep : usize,
 }
 
 impl Score {
     pub fn reset(&mut self) {
         self.lost = 0;
         self.saved = 0;
-        self.total = 0;
+        self.total_sheep = 0;
     }
 }
 

@@ -114,9 +114,9 @@ fn load(mut cmd: Commands, mut game_assets: ResMut<GameAssets>, server: Res<Asse
     game_assets.add(server.load_folder("audio").untyped());
 
     cmd.insert_resource(Levels::new(vec![
-        server.load("levels/1.level.ron"),
+        // server.load("levels/1.level.ron"),
         server.load("levels/2.level.ron"),
-        server.load("levels/3.level.ron"),
-        server.load("levels/4.level.ron"),
+        // server.load("levels/3.level.ron"),
+        // server.load("levels/4.level.ron"),
     ]));
 }

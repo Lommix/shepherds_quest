@@ -33,7 +33,7 @@ impl Plugin for UiPlugin {
             Update,
             update_ui.run_if(on_timer(Duration::from_millis(100))),
         );
-        app.add_systems(Update, (back_to_menu, close_dialog));
+        app.add_systems(Update, (back_to_menu, roll_credits, close_dialog));
     }
 }
 
@@ -45,6 +45,9 @@ pub struct BackToMenuButton;
 
 #[derive(Component)]
 pub struct HideDialogButton;
+
+#[derive(Component)]
+pub struct CreditsButton;
 
 #[derive(Component)]
 pub struct DialogBoxTag;
@@ -62,8 +65,12 @@ fn update_ui(
 ) {
     level.iter_mut().for_each(|ent| {
         let mut text = texts.get_mut(ent).unwrap();
-        let percent_lost = (game_score.lost as f32) / (game_score.total as f32) * 100.;
-        text.sections[0].value = format!("Lost: {:.0} %", percent_lost);
+
+        let percent_lost = game_score.lost as f32 / game_score.total_sheep as f32;
+
+        info!("Updating lost percent {}, lost {}, total {}", percent_lost, game_score.lost, game_score.total_sheep);
+
+        text.sections[0].value = format!("Lost: {} %", percent_lost * 100.);
     });
 }
 
@@ -144,7 +151,7 @@ fn spawn_ui(mut cmd: Commands, portrait: Res<PortraitRender>, server: Res<AssetS
             cmd.spawn(ButtonBundle {
                 style: Style {
                     position_type: PositionType::Absolute,
-                    right: Val::Px(10.),
+                    left: Val::Px(10.),
                     bottom: Val::Percent(2.),
                     padding: UiRect::all(Val::Px(10.)),
                     ..default()
@@ -278,6 +285,20 @@ fn close_dialog(
         }
         _ => {}
     });
+}
+
+fn roll_credits(
+    mut state: ResMut<NextState<GameState>>,
+    query: Query<(&Interaction, &CreditsButton), Changed<Interaction>>,
+) {
+    query
+        .iter()
+        .for_each(|(interaction, _)| match *interaction {
+            Interaction::Pressed => {
+                state.set(GameState::Credits);
+            }
+            _ => {}
+        });
 }
 
 fn back_to_menu(

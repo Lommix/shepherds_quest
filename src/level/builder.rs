@@ -269,7 +269,7 @@ fn load_level(
 
         cmd.entity(entity).insert(LevelLoaded);
         dialog.sections[0].value = format!("{} There are {} sheep",level.intro.clone(), sheep_spawn_count * level.sheeps_per_spawn);
-        score.total = sheep_spawn_count * level.sheeps_per_spawn;
+        score.total_sheep = sheep_spawn_count * level.sheeps_per_spawn;
 
         let level_size = level.size.unwrap() + Vec2::splat(TILE_SIZE);
         for _ in 0..50 {

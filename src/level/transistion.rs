@@ -4,7 +4,7 @@ use bevy_nine_slice_ui::NineSliceUiTexture;
 use crate::{
     menu::LevelSelectorButton,
     state::{AllowedState, GameState},
-    ui::DialogBoxTag,
+    ui::{DialogBoxTag, CreditsButton},
 };
 
 use super::{
@@ -74,7 +74,6 @@ fn retry_level(
 fn next_level(
     mut event: EventReader<LevelWon>,
     mut cmd: Commands,
-    mut state: ResMut<NextState<GameState>>,
     mut dialog_box: Query<&mut Visibility, With<DialogBoxTag>>,
     levels: Res<Levels>,
     server: Res<AssetServer>,
@@ -95,17 +94,45 @@ fn next_level(
         ..default()
     })
     .insert(AllowedState::new(GameState::Game))
-    .with_children(|builder| {
+    .with_children(|cmd| {
         if let Some(next) = levels.next() {
-            spawn_progress_button("Next Level", next, builder, &server);
+            spawn_progress_button("Next Level", next, cmd, &server);
         }
-
         if levels.is_last() {
-            state.set(GameState::Credits);
+            cmd.spawn(ButtonBundle {
+                style: Style {
+                    display: Display::Flex,
+                    width: Val::Px(200.),
+                    height: Val::Px(50.),
+                    margin: UiRect::vertical(Val::Px(15.)),
+                    justify_content: JustifyContent::Center,
+                    align_items: AlignItems::Center,
+                    ..default()
+                },
+                ..default()
+            })
+            .insert(CreditsButton)
+            .insert(NineSliceUiTexture::from_slice(
+                server.load("sprites/ui.png"),
+                Rect::new(48., 0., 96., 48.),
+            ))
+            .with_children(|cmd| {
+                cmd.spawn(TextBundle {
+                    text: Text::from_section(
+                        "Happy end!",
+                        TextStyle {
+                            font_size: 20.,
+                            color: Color::WHITE,
+                            ..default()
+                        },
+                    ),
+                    ..default()
+                });
+            });
             return;
         }
 
-        spawn_progress_button("Retry", levels.current(), builder, &server);
+        spawn_progress_button("Retry", levels.current(), cmd, &server);
     });
 
     dialog_box.iter_mut().for_each(|mut vis| {
