@@ -53,21 +53,21 @@ fn keyboard_control(
     };
 
     let mut direction = Vec2::ZERO;
-    if inputs.pressed(KeyCode::W) {
+    if inputs.pressed(KeyCode::Up) || inputs.pressed(KeyCode::W) {
         direction.y -= 1.;
         direction.x -= 1.;
     }
-    if inputs.pressed(KeyCode::S) {
+    if inputs.pressed(KeyCode::Down) || inputs.pressed(KeyCode::S){
         direction.y += 1.;
         direction.x += 1.;
     }
 
-    if inputs.pressed(KeyCode::A) {
+    if inputs.pressed(KeyCode::Left) || inputs.pressed(KeyCode::A){
         direction.x += 1.;
         direction.y -= 1.;
     }
 
-    if inputs.pressed(KeyCode::D) {
+    if inputs.pressed(KeyCode::Right) || inputs.pressed(KeyCode::D){
         direction.x -= 1.;
         direction.y += 1.;
     }
