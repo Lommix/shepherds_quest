@@ -1,6 +1,6 @@
 (
     name: "Pug in training",
-    intro: "Shepherd Bob: Hey Henk, you know the drill, right? Same deal as before, I need you to herd my sheep into the \"pen\". This will be more difficult, a nearby volcano erupted. I equipped you with lava resistant boots, but the sheep can't stand the heat. Get at least 50% of the sheep into the pen!",
+    intro: "Shepherd Bob: Hey Henk, you know the drill, right? Same deal as before, I need you to herd my sheep into the \"pen\". This will be more difficult, a nearby volcano erupted. I equipped you with lava resistant boots, but the sheep can't stand the heat.",
     win: "Good boy! Let's rob the next farm!",
     loose: "Bad boy! You messed up! Do a better job or I'll have to find another dog!",
     sheeps_per_spawn: 120,

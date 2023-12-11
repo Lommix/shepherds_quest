@@ -48,8 +48,9 @@ fn main() {
                 })
                 .set(WindowPlugin {
                     primary_window: Some(Window {
-                        title: "Bevy App".to_string(),
-                        resolution: WindowResolution::new(1280., 720.),
+                        canvas : Some("#canvas".into()),
+                        fit_canvas_to_parent : true,
+                        title: "A strange shepherd's quest".into(),
                         ..default()
                     }),
                     ..default()

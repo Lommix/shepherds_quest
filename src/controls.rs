@@ -3,10 +3,12 @@ use bevy::{
     input::{mouse::MouseButtonInput, touch::TouchPhase},
     prelude::*,
 };
+use bevy_rapier2d::dynamics::Velocity;
 
 use crate::{
     animals::{dog::DogTag, physics::MoveTo},
     camera::MainCamera,
+    level::loader::LevelAsset,
     GameSettings,
 };
 
@@ -17,6 +19,7 @@ impl Plugin for ControlPlugin {
         app.add_systems(Update, touch_event.run_if(on_event::<TouchInput>()));
         app.add_systems(Update, click_event.run_if(on_event::<MouseButtonInput>()));
         app.add_systems(Update, command_dog.run_if(on_event::<MapClickEvent>()));
+        app.add_systems(Update, keyboard_control);
     }
 }
 
@@ -32,6 +35,52 @@ impl MapClickEvent {
     pub fn button(&self) -> MouseButton {
         self.button
     }
+}
+
+fn keyboard_control(
+    inputs: Res<Input<KeyCode>>,
+    mut dogs: Query<&mut Velocity, With<DogTag>>,
+    levels: Res<Assets<LevelAsset>>,
+    level: Query<&Handle<LevelAsset>>,
+) {
+    let Ok(handle) = level.get_single() else {
+        debug!("wtf you doing");
+        return;
+    };
+
+    let Some(level) = levels.get(handle) else {
+        return;
+    };
+
+    let mut direction = Vec2::ZERO;
+    if inputs.pressed(KeyCode::W) {
+        direction.y -= 1.;
+        direction.x -= 1.;
+    }
+    if inputs.pressed(KeyCode::S) {
+        direction.y += 1.;
+        direction.x += 1.;
+    }
+
+    if inputs.pressed(KeyCode::A) {
+        direction.x += 1.;
+        direction.y -= 1.;
+    }
+
+    if inputs.pressed(KeyCode::D) {
+        direction.x -= 1.;
+        direction.y += 1.;
+    }
+
+
+    if direction == Vec2::ZERO {
+        return;
+    }
+
+    dogs.iter_mut().for_each(|mut velocity| {
+        velocity.linvel = direction.normalize_or_zero()
+            * level.animal_behavior.as_ref().unwrap_or_default().dog_speed;
+    });
 }
 
 fn touch_event(

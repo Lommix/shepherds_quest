@@ -1,7 +1,7 @@
 use std::time::Duration;
 
 use crate::{
-    level::Score,
+    level::{Score, Levels},
     state::{AllowedState, GameState},
     util::VisibilityTimer,
 };
@@ -61,6 +61,7 @@ struct ScoreText;
 fn update_ui(
     mut texts: Query<&mut Text>,
     mut level: Query<Entity, With<ScoreText>>,
+    levels : Res<Levels>,
     game_score: Res<Score>,
 ) {
     level.iter_mut().for_each(|ent| {
@@ -71,7 +72,7 @@ fn update_ui(
         let percent_lost = game_score.lost as f32 / game_score.total_sheep as f32;
         let percent_saved = game_score.saved as f32 / game_score.total_sheep as f32;
 
-        text.sections[0].value = format!("Lost: {:.0} %  Escorted {:.0} %", percent_lost * 100., percent_saved * 100.);
+        text.sections[0].value = format!("Lost: {:.0} %  Escorted {:.0} %  Level {}/4", percent_lost * 100., percent_saved * 100., levels.current_index() + 1);
     });
 }
 

@@ -61,6 +61,13 @@ impl Levels {
         }
     }
 
+    pub fn current_index(&self) -> usize {
+        match self.current {
+            Current::Campaign(id) => id,
+            Current::Custom(_) => 0,
+        }
+    }
+
     pub fn is_last(&self) -> bool {
         match self.current {
             Current::Campaign(id) => id >= self.levels.len() - 1,

@@ -1,6 +1,6 @@
 (
     name: "Pug in training",
-    intro: "Shepherd Bob: This is your last test, Henk. I gave you super treats. You are faster now! Get 50% of the sheeps to the ship!",
+    intro: "Shepherd Bob: This is your last test, Henk. The sheep are very scared. Get to it!",
     win: "Good boy! You passed the test! Let's rob the galaxy!",
     loose: "Bad boy! You messed up! Do a better job or I'll have to find another dog!",
     sheeps_per_spawn: 80,
@@ -10,7 +10,7 @@
             alignment: 0.8,
             cohesion: 1.0,
             separation: 0.1,
-            sheep_speed: 25.0,
+            sheep_speed: 32.0,
             vision: 20.0,
             fear: 1.0,
             motivation: 0.1,
